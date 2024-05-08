@@ -12,7 +12,7 @@ import (
 func init() {
   log.Info("Initializing DockerRight")
   log.TempInit()
-  config.Init("./config.json")
+  config.Init("./config/config.json")
   log.Init(config.Conf.LogLevel)
   docker.Init()
   notify.Init()
@@ -20,6 +20,11 @@ func init() {
 
 func main() {
   log.Info("Starting DockerRight")
+
+  if config.Conf.Enabled == false {
+    log.Warn("DockerRight is disabled! Edit the config file and restart :)")
+    return
+  }
 
   if config.Conf.BackupOnStartup {
     log.Info("Running DockerRight on startup")

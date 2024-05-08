@@ -21,5 +21,4 @@ services:
       - ./:/opt/DockerRight
     environment:
       TZ: Europe/Berlin
-      BACKUP_PATH: /opt/dockerBackup/backup
 
