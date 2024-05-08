@@ -9,7 +9,7 @@
 
 ## Description
 
-A simple Docker Container that allows you to monitor your Docker Containers and backup your Docker Volumes, with notifictaions.
+A simple Docker Container that allows you to monitor your other Docker Containers and backup your Docker Volumes, with notifictaions.
 
 It creates a tarball (.tar) per configured volume, at the configured time, and stores it in the configured location :)
 In the best case the Output directory is mapped to a Network Drive or another Host.
@@ -18,7 +18,7 @@ To see whats working now and whats planned in the near future see [TODOs](#todos
 
 ## Limitations/Warnings
 
-Not recommended to use for DBs or complex applications, but still better than no backup at all :D
+Not recommended to use DockerRight as a solo backup solution for DBs or complex applications! But it's still better than no backup at all :D
 
 It is a very young and developing Project, so use at your own risk!
 
@@ -58,34 +58,39 @@ Now you edit the created config.json.
 
 Parameters that can be set in the config.json. To reset them, delete the config.json and restart the container.
 
-| Parameter                     | Default                    | Type     | Description                                            |
-|-------------------------------|----------------------------|----------|--------------------------------------------------------|
-| Enabled                       | false                      | Bool     | Enable Service                                         |
-| MonitorIntervalSeconds        | 60                         | Int      | Interval in seconds                                    |
-| MonitorReties                 | 5                          | Int      | Retries before sending notification                    |
-| BackupHours                   | []                         | []Int    | Backup at these hours                                  |
-| RetentionHours                | 120                        | Int      | Retention in hours (24 * 5)                            |
-| ConcurrentBackupContainer     | numCPUs/2                  | Int      | How many mounts should be backed up at once            |
-| BackupPath                    | "/opt/dockerBackup/backup" | String   | Backup Path inside Container (shouldn't be changed)    |
-| BeforeBackupCMD               | ""                         | String   | CMD to execute before backup                           |
-| AfterBackupCMD                | ""                         | String   | CMD to execute after backup                            |
-| LogLevel                      | "info"                     | String   | Log Level                                              |
-| BackupOnStartup               | false                      | Bool     | Backup on Startup                                      |
-| CreateTestContainerOnStartup  | true                       | Bool     | Create Test Container on Startup, to check docker.sock |
+| Parameter                     | Default                    | Type     | Description                                                   |
+|-------------------------------|----------------------------|----------|---------------------------------------------------------------|
+| Enabled                       | false                      | Bool     | Enable Service                                                |
+| MonitorIntervalSeconds        | 60                         | Int      | Interval in seconds                                           |
+| MonitorReties                 | 5                          | Int      | Retries before sending notification                           |
+| BackupHours                   | []                         | []Int    | Backup at these hours                                         |
+| RetentionHours                | 120                        | Int      | Retention in hours (24 * 5)                                   |
+| ConcurrentBackupContainer     | numCPUs/2                  | Int      | How many mounts should be backed up at once                   |
+| BackupPath                    | "/opt/dockerBackup/backup" | String   | Backup Path inside Container (shouldn't be changed)           |
+| BeforeBackupCMD               | ""                         | String   | CMD to execute before backup                                  |
+| AfterBackupCMD                | ""                         | String   | CMD to execute after backup                                   |
+| LogLevel                      | "info"                     | String   | Log Level                                                     |
+| BackupOnStartup               | false                      | Bool     | Backup on Startup                                             |
+| CreateTestContainerOnStartup  | true                       | Bool     | Create a TestContainer on Startup, to check docker.sock       |
 
 ## TODOs
 
-What's planned in the near future? If you have any ideas, please [open an issue](https://github.com/bata94/dockerRight/issues) or [create a PR](https://github.com/bata94/dockerRight/pulls) :)
+What's planned in the near future? If you have any ideas, feature requests, suggestions or bug reports, please [open an issue](https://github.com/bata94/dockerRight/issues) or [create a PR](https://github.com/bata94/dockerRight/pulls) :)
+
+Those points are roughly in order of importance (for me):
 
 - [X] Create Backups per mount
+- [ ] Monitor Docker Containers
 - [ ] Telegram Notifications
-- [ ] Discord Notifications
 - [ ] Mail Notifications
+- [ ] Discord Notifications
 - [ ] Logs to File
 - [ ] BackupContainer Output to File
 - [ ] Make config parameters settable by environment variables
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Add tests
+- [ ] Backup Docker Compose Files/Run Parameters
+- [ ] Restore Backups
 
 ## License
 
