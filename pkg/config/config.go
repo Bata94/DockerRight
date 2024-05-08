@@ -12,7 +12,7 @@ var ConfigPath string
 var Conf Config
 
 func Init(configPath string) Config {
-  log.Info("Initializing, loading config file...")
+  log.Info("Initializing Config Module") 
   ConfigPath = configPath
 
   if ConfigPath == "" {
@@ -41,11 +41,15 @@ type Config struct {
   ExcludeVolumes []string
   IncludeMounts []string
   ExcludeMounts []string
+  MonitorIntervalSeconds int
+  MonitorRetries int
+  BackupHours []int
   RetentionHours int
   ConcurrentBackupContainer int
   BackupPath string
   BeforeBackupCMD string
   AfterBackupCMD string
+  LogLevel string
   BackupOnStartup bool
   CreateTestContainerOnStartup bool
 }
@@ -60,10 +64,14 @@ func (c *Config) SetDefaults() error {
   c.IncludeMounts = []string{}
   c.ExcludeMounts = []string{}
   c.RetentionHours = 24 * 5
+  c.MonitorIntervalSeconds = 60
+  c.MonitorRetries = 5
+  c.BackupHours = []int{2}
   c.ConcurrentBackupContainer = (runtime.NumCPU() / 2)
   c.BackupPath = "./testDirs/backupDir/"
   c.BeforeBackupCMD = ""
   c.AfterBackupCMD = ""
+  c.LogLevel = "debug"
   c.BackupOnStartup = false
   c.CreateTestContainerOnStartup = true
 

@@ -1,6 +1,7 @@
 testDirs/
 backup/
+logs/
 config.json
 tmp/
 bin/
-
+.env

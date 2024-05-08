@@ -1,11 +1,38 @@
 package log
 
 import (
+  "strings"
   logger "github.com/sirupsen/logrus"
 )
 
-func Init() {
-  logger.SetLevel(logger.DebugLevel)
+func TempInit() {
+  logger.Info("Initializing temp Logger Module")
+  logger.SetLevel(0)
+}
+
+func Init(logLvlStr string) {
+  logger.Info("Initializing final Logger Module")
+  logLvl := logger.InfoLevel
+  logLvlStr = strings.ToLower(logLvlStr)
+
+  switch logLvlStr {
+  case "debug":
+    logLvl = logger.DebugLevel
+  case "info":
+    logLvl = logger.InfoLevel
+  case "warn":
+    logLvl = logger.WarnLevel
+  case "error":
+    logLvl = logger.ErrorLevel
+  case "fatal":
+    logLvl = logger.FatalLevel
+  case "panic":
+    logLvl = logger.PanicLevel
+  default:
+    logLvl = logger.InfoLevel
+  }
+
+  logger.SetLevel(logLvl)
 }
 
 func Debug(err ...interface{}) {

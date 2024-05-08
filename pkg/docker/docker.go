@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+  "os/exec"
 	"strings"
 
 	"github.com/docker/docker/api/types"
@@ -27,7 +28,7 @@ var (
 )
 
 func Init() {
-  log.Info("Initializing Docker")
+  log.Info("Initializing Docker Module")
   var err error
 
   cli, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -192,8 +193,7 @@ func RunContainer(p RunContainerParams) error {
     return err
   }
 
-  log.Info("Container output:")
-  log.Info(string(logs))
+  log.Debug("Container output:", "\n", string(logs))
 
   if p.Remove {
     err = RemoveContainer(ctr.ID)
@@ -205,8 +205,28 @@ func RunContainer(p RunContainerParams) error {
   return nil
 }
 
+func MonitorContainers() error {
+  log.Info("MonitorContainers")
+
+  return nil
+}
+
 func BackupContainers() error {
-  log.Debug("BackupContainers")
+  log.Info("BackupContainers")
+
+  if config.Conf.BeforeBackupCMD != "" {
+    log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
+    runCmd := exec.Command("sh", "-c", config.Conf.BeforeBackupCMD)
+
+    output, err := runCmd.Output()
+    if err != nil {
+      log.Error("Error running BeforeBackupCMD: ")
+      log.Error(err)
+      return err
+    }
+
+    log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
+  }
 
   containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
   if err != nil {
@@ -232,6 +252,20 @@ func BackupContainers() error {
     if backupErr != nil {
       continue
     }
+  }
+  
+  if config.Conf.AfterBackupCMD != "" {
+    log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
+    runCmd := exec.Command("sh", "-c", config.Conf.AfterBackupCMD)
+
+    output, err := runCmd.Output()
+    if err != nil {
+      log.Error("Error running AfterBackupCMD: ")
+      log.Error(err)
+      return err
+    }
+
+    log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
   }
 
   return nil
