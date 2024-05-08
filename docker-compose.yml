@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: Europe/Berlin
+    restart: always
+
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/opt/DockerRight
+    environment:
+      TZ: Europe/Berlin
+      BACKUP_PATH: /opt/dockerBackup/backup
+
