@@ -1,6 +1,7 @@
 testDirs/
 backup/
 logs/
+/config/
 config.json
 tmp/
 bin/

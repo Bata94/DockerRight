@@ -35,12 +35,7 @@ func Init(configPath string) Config {
 }
 
 type Config struct {
-  IncludeContainers []string
-  ExcludeContainers []string
-  IncludeVolumes []string
-  ExcludeVolumes []string
-  IncludeMounts []string
-  ExcludeMounts []string
+  Enabled bool
   MonitorIntervalSeconds int
   MonitorRetries int
   BackupHours []int
@@ -57,18 +52,13 @@ type Config struct {
 func (c *Config) SetDefaults() error {
   log.Info("Config SetDefaults")
 
-  c.IncludeContainers = []string{}
-  c.ExcludeContainers = []string{}
-  c.IncludeVolumes = []string{}
-  c.ExcludeVolumes = []string{}
-  c.IncludeMounts = []string{}
-  c.ExcludeMounts = []string{}
+  c.Enabled = false
   c.RetentionHours = 24 * 5
   c.MonitorIntervalSeconds = 60
   c.MonitorRetries = 5
-  c.BackupHours = []int{2}
+  c.BackupHours = []int{}
   c.ConcurrentBackupContainer = (runtime.NumCPU() / 2)
-  c.BackupPath = "./testDirs/backupDir/"
+  c.BackupPath = "/opt/DockerRight/backup/"
   c.BeforeBackupCMD = ""
   c.AfterBackupCMD = ""
   c.LogLevel = "debug"
@@ -89,31 +79,6 @@ func (c *Config) LoadFromEnv() error {
   log.Info("Config LoadFromEnv")
 
   // TODO: Implement this!
-
-  // if os.Getenv("INCLUDE_CONTAINERS") != "" {
-  //   c.IncludeContainers = os.Getenv("INCLUDE_CONTAINERS").Split(",")
-  // }
-  // if os.Getenv("EXCLUDE_CONTAINERS") != "" {
-  //   c.ExcludeContainers = os.Getenv("EXCLUDE_CONTAINERS").Split(",")
-  // }
-  // if os.Getenv("INCLUDE_VOLUMES") != "" {
-  //   c.IncludeVolumes = os.Getenv("INCLUDE_VOLUMES").Split(",")
-  // }
-  // if os.Getenv("EXCLUDE_VOLUMES") != "" {
-  //   c.ExcludeVolumes = os.Getenv("EXCLUDE_VOLUMES").Split(",")
-  // }
-  // if os.Getenv("INCLUDE_MOUNTS") != "" {
-  //   c.IncludeMounts = os.Getenv("INCLUDE_MOUNTS").Split(",")
-  // }
-  // if os.Getenv("EXCLUDE_MOUNTS") != "" {
-  //   c.ExcludeMounts = os.Getenv("EXCLUDE_MOUNTS").Split(",")
-  // }
-  // if os.Getenv("RETENTION_HOURS") != "" {
-  //   c.RetentionHours = os.Getenv("RETENTION_HOURS").ToInt()
-  // }
-  // if os.Getenv("CONCURRENT_BACKUP_CONTAINER") != "" {
-  //   c.ConcurrentBackupContainer = os.Getenv("CONCURRENT_BACKUP_CONTAINER").ToInt()
-  // }
   if os.Getenv("BACKUP_PATH") != "" {
     c.BackupPath = os.Getenv("BACKUP_PATH")
   }
@@ -123,12 +88,6 @@ func (c *Config) LoadFromEnv() error {
   if os.Getenv("AFTER_BACKUP_CMD") != "" {
     c.AfterBackupCMD = os.Getenv("AFTER_BACKUP_CMD")
   }
-  // if os.Getenv("BACKUP_ON_STARTUP") != "" {
-  //   c.BackupOnStartup = os.Getenv("BACKUP_ON_STARTUP").ToBool()
-  // }
-  // if os.Getenv("CREATE_TEST_CONTAINER_ON_STARTUP") != "" {
-  //   c.CreateTestContainerOnStartup = os.Getenv("CREATE_TEST_CONTAINER_ON_STARTUP").ToBool()
-  // }
 
   return nil
 }
