@@ -2,6 +2,7 @@ package main
 
 import (
   "time"
+  "os"
 
 	"DockerRight/pkg/config"
 	"DockerRight/pkg/docker"
@@ -12,6 +13,7 @@ import (
 func init() {
   log.Info("Initializing DockerRight")
   log.TempInit()
+  os.Mkdir("./config", 0755)
   config.Init("./config/config.json")
   log.Init(config.Conf.LogLevel)
   docker.Init()
@@ -21,20 +23,23 @@ func init() {
 func main() {
   log.Info("Starting DockerRight")
 
-  if config.Conf.Enabled == false {
+  if config.Conf.EnableBackup == false && config.Conf.EnableMonitor == false {
     log.Warn("DockerRight is disabled! Edit the config file and restart :)")
     return
   }
 
-  if config.Conf.BackupOnStartup {
+  if config.Conf.BackupOnStartup && config.Conf.EnableBackup {
     log.Info("Running DockerRight on startup")
     docker.BackupContainers()
   }
-
-  go monitorLoop()
+  
+  if config.Conf.EnableMonitor {
+    // TODO: Not working if Backup is disabled
+    go monitorLoop()
+  }
 
   lastBackupHour := -1
-  for true {
+  for config.Conf.EnableBackup {
     curHour := time.Now().Hour()
     log.Info("Current hour: ", curHour)
     log.Info("BackupHours: ", config.Conf.BackupHours)

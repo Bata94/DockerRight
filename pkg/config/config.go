@@ -35,7 +35,8 @@ func Init(configPath string) Config {
 }
 
 type Config struct {
-  Enabled bool
+  EnableBackup bool
+  EnableMonitor bool
   MonitorIntervalSeconds int
   MonitorRetries int
   BackupHours []int
@@ -52,7 +53,8 @@ type Config struct {
 func (c *Config) SetDefaults() error {
   log.Info("Config SetDefaults")
 
-  c.Enabled = false
+  c.EnableBackup = false
+  c.EnableMonitor = false
   c.RetentionHours = 24 * 5
   c.MonitorIntervalSeconds = 60
   c.MonitorRetries = 5

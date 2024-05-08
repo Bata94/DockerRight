@@ -31,7 +31,6 @@ docker run -d
     -v /path/to/config:/opt/DockerRight/config
     -v /path/to/backupDir:/opt/DockerRight/backup
     -e TZ=Europe/Berlin
-    --restart always
     --name dockerright 
     ghcr.io/bata94/dockerright:latest
 ```
@@ -47,12 +46,13 @@ services:
       - /path/to/backupDir:/opt/DockerRight/backup
     environment:
       TZ: Europe/Berlin
-    restart: always
 ```
 
 Start the Container, it will stop after a few seconds on it's own.
 
 Now you edit the created config.json. 
+
+A restart option might be a good idea, for such a service, but it's easier to set it after the first run, to only generate the config.json.
 
 ### Configuration
 
@@ -60,18 +60,19 @@ Parameters that can be set in the config.json. To reset them, delete the config.
 
 | Parameter                     | Default                    | Type     | Description                                                   |
 |-------------------------------|----------------------------|----------|---------------------------------------------------------------|
-| Enabled                       | false                      | Bool     | Enable Service                                                |
+| EnableBackup                  | false                      | Bool     | Enable backup service                                         |
+| EnableMonitor                 | false                      | Bool     | Enable monitor service                                        |
 | MonitorIntervalSeconds        | 60                         | Int      | Interval in seconds                                           |
 | MonitorReties                 | 5                          | Int      | Retries before sending notification                           |
 | BackupHours                   | []                         | []Int    | Backup at these hours                                         |
 | RetentionHours                | 120                        | Int      | Retention in hours (24 * 5)                                   |
 | ConcurrentBackupContainer     | numCPUs/2                  | Int      | How many mounts should be backed up at once                   |
-| BackupPath                    | "/opt/dockerBackup/backup" | String   | Backup Path inside Container (shouldn't be changed)           |
+| BackupPath                    | "/opt/dockerBackup/backup" | String   | Backup Path inside container (shouldn't be changed)           |
 | BeforeBackupCMD               | ""                         | String   | CMD to execute before backup                                  |
 | AfterBackupCMD                | ""                         | String   | CMD to execute after backup                                   |
-| LogLevel                      | "info"                     | String   | Log Level                                                     |
-| BackupOnStartup               | false                      | Bool     | Backup on Startup                                             |
-| CreateTestContainerOnStartup  | true                       | Bool     | Create a TestContainer on Startup, to check docker.sock       |
+| LogLevel                      | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)         |
+| BackupOnStartup               | false                      | Bool     | Backup on startup                                             |
+| CreateTestContainerOnStartup  | true                       | Bool     | Create a TestContainer on startup, to check docker.sock       |
 
 ## TODOs
 
