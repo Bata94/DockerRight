@@ -1,6 +1,7 @@
 # DockerBackup
 
-This is a simple Docker Container that allows you to backup your Docker Volumes.
+This is a simple Docker Container that allows you to monitor your Docker Containers and backup your Docker Volumes, with notifictaions.
+
 It creates a tarball per configured volume, at the configured time, and stores it in the configured location :)
 In the best case the Output directory is mapped to a Network Drive or another Host.
 
