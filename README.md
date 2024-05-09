@@ -54,6 +54,8 @@ Now you edit the created config.json.
 
 A restart option might be a good idea, for such a service, but it's easier to set it after the first run, to only generate the config.json.
 
+If you don't set Before- or AfterBackupCMDs that would need network access, you should set the Docker Network to "none".
+
 ### Configuration
 
 Parameters that can be set in the config.json. To reset them, delete the config.json and restart the container.
@@ -67,11 +69,11 @@ Parameters that can be set in the config.json. To reset them, delete the config.
 | BackupHours                   | []                         | []Int    | Backup at these hours                                         |
 | RetentionHours                | 120                        | Int      | Retention in hours (24 * 5)                                   |
 | ConcurrentBackupContainer     | numCPUs/2                  | Int      | How many mounts should be backed up at once                   |
-| BackupPath                    | "/opt/dockerBackup/backup" | String   | Backup Path inside container (shouldn't be changed)           |
+| BackupPath                    | "/opt/DockerRight/backup"  | String   | Backup Path inside container (shouldn't be changed)           |
 | BeforeBackupCMD               | ""                         | String   | CMD to execute before backup                                  |
 | AfterBackupCMD                | ""                         | String   | CMD to execute after backup                                   |
 | LogLevel                      | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)         |
-| BackupOnStartup               | false                      | Bool     | Backup on startup                                             |
+| BackupOnStartup               | false                      | Bool     | Start a Backup on startup                                     |
 | CreateTestContainerOnStartup  | true                       | Bool     | Create a TestContainer on startup, to check docker.sock       |
 
 ## TODOs
@@ -81,6 +83,7 @@ What's planned in the near future? If you have any ideas, feature requests, sugg
 Those points are roughly in order of importance (for me):
 
 - [X] Create Backups per mount
+- [X] Delete old Backups
 - [ ] Monitor Docker Containers
 - [ ] Telegram Notifications
 - [ ] Mail Notifications
@@ -88,6 +91,7 @@ Those points are roughly in order of importance (for me):
 - [ ] Logs to File
 - [ ] BackupContainer Output to File
 - [ ] Make config parameters settable by environment variables
+- [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Add tests
 - [ ] Backup Docker Compose Files/Run Parameters

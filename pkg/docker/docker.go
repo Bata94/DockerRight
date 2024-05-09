@@ -268,6 +268,12 @@ func BackupContainers() error {
     log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
   }
 
+  log.Info("BackupContainers done")
+  err = DeleteOldBackups()
+  if err != nil {
+    return err
+  }
+
   return nil
 }
 
@@ -282,14 +288,13 @@ func RunBackupHelperForContainer(container types.Container) error {
 
   containerName := "DockerRight-BackupRunner-" + container.ID
   now := time.Now()
-  backupPath := ""
-  curPWD, err := os.Getwd()
-  if err != nil {
-    log.Error(err)
-    return err
+  
+  backupPathBase := config.Conf.BackupPath
+  if strings.HasSuffix(backupPathBase, "/") == false {
+    backupPathBase = backupPathBase + "/"
   }
-  backupPath = curPWD + "/backup" + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05")
-  err = os.MkdirAll(backupPath, 0755)
+  backupPath := backupPathBase + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05")
+  err := os.MkdirAll(backupPath, 0755)
   if err != nil {
     log.Error(err)
     return err
@@ -317,6 +322,52 @@ func RunBackupHelperForContainer(container types.Container) error {
     })
     if err != nil {
       return err
+    }
+  }
+
+  return nil
+}
+
+func DeleteOldBackups() error {
+  log.Info("DeleteOldBackups")
+
+  containerDirs, err := os.ReadDir(config.Conf.BackupPath)
+  if err != nil {
+    log.Error("Error reading backup path: ", err)
+    return err
+  }
+
+  log.Info("Found ", len(containerDirs), " containerDirs:", "\n", containerDirs)
+
+  for _, c := range containerDirs {
+    if c.IsDir() {
+      log.Info("ContainerDir: ", c.Name())
+      backupDirs, err := os.ReadDir(config.Conf.BackupPath + "/" + c.Name())
+      if err != nil {
+        log.Error("Error reading backup path: ", err)
+        continue
+      }
+      log.Info("Found ", len(backupDirs), " backupDirs:", "\n", backupDirs)
+      for _, b := range backupDirs {
+        if b.IsDir() {
+          log.Info("BackupDir: ", b.Name())
+          backupTime, err := time.Parse("2006-01-02-15-04-05", b.Name())
+          if err != nil {
+            log.Error("Error parsing backup time: ", err)
+            continue
+          }
+          timeSinceBackup := time.Since(backupTime).Hours()
+          log.Info("timeSinceBackup: ", timeSinceBackup)
+          if timeSinceBackup > float64(config.Conf.RetentionHours) {
+            log.Info("Removing ", config.Conf.BackupPath + "/" + c.Name() + "/" + b.Name())
+            err = os.RemoveAll(config.Conf.BackupPath + "/" + c.Name() + "/" + b.Name())
+            if err != nil {
+              log.Error("Error removing backup: ", err)
+              continue
+            }
+          }
+        }
+      }
     }
   }
 
