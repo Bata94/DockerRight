@@ -3,14 +3,15 @@ package docker
 import (
 	"DockerRight/pkg/config"
 	"DockerRight/pkg/log"
+	"errors"
 
-  "time"
 	"context"
 	"fmt"
 	"io"
 	"os"
-  "os/exec"
+	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	// "github.com/docker/docker/api/types/volume"
@@ -213,6 +214,32 @@ func MonitorContainers() error {
 
 func BackupContainers() error {
   log.Info("BackupContainers")
+  hostBackupPath := ""
+
+  containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
+  if err != nil {
+    log.Error("Error listing containers: ")
+    log.Error(err)
+    return err
+  }
+
+  for _, ctr := range containers {
+    log.Debug(ctr.Names)
+    if strings.Contains(strings.ToLower(ctr.Names[0]), "dockerright") {
+        for _, m := range ctr.Mounts {
+          log.Debug(m)
+          if strings.ToLower(m.Destination) == strings.ToLower(config.Conf.BackupPath) {
+            hostBackupPath = m.Source
+          }
+        }
+    }
+  }
+
+  if hostBackupPath == "" {
+    err := errors.New("Error finding backup path! Maybe you changed the Dockerright Container name to something else then 'dockerright'?")
+    log.Error(err)
+    return err
+  }
 
   if config.Conf.BeforeBackupCMD != "" {
     log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
@@ -228,13 +255,6 @@ func BackupContainers() error {
     log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
   }
 
-  containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
-  if err != nil {
-  	log.Error("Error listing containers: ")
-  	log.Error(err)
-  	return err
-  }
-
   for _, ctr := range containers {
     // Skip dockerright named containers
     skip := false
@@ -248,7 +268,7 @@ func BackupContainers() error {
       continue
     }
 
-    backupErr := RunBackupHelperForContainer(ctr)
+    backupErr := RunBackupHelperForContainer(ctr, hostBackupPath)
     if backupErr != nil {
       continue
     }
@@ -277,7 +297,7 @@ func BackupContainers() error {
   return nil
 }
 
-func RunBackupHelperForContainer(container types.Container) error {
+func RunBackupHelperForContainer(container types.Container, hostBackupPath string) error {
   log.Debug("RunBackupHelperForContainer" + container.Names[0])
   log.Debug(fmt.Sprintf("%s %s %s (status: %s)\n", container.ID, container.Names, container.Image, container.Status))
 
@@ -304,7 +324,7 @@ func RunBackupHelperForContainer(container types.Container) error {
   for _, m := range container.Mounts {
     log.Debug(fmt.Sprintf("Creating container %s", containerName))
     mountInfoFileName := fmt.Sprint(m.Type) + strings.Replace(m.Destination, "/", "_", -1)
-    cmd := []string{"tar", "cvf", "/opt/backup" + "/" + mountInfoFileName + ".tar", m.Destination}
+    cmd := []string{"tar", "cvf", "/opt/backup" + "/" + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05") + "/" + mountInfoFileName + ".tar", m.Destination}
     log.Debug(cmd)
     err := RunContainer(RunContainerParams{
       ContainerName: containerName,
@@ -315,7 +335,7 @@ func RunBackupHelperForContainer(container types.Container) error {
       Mounts: []mount.Mount{
         {
           Type:   mount.TypeBind,
-          Source: backupPath,
+          Source: hostBackupPath,
           Target: "/opt/backup",
         },
       },

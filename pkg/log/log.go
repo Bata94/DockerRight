@@ -1,13 +1,15 @@
 package log
 
 import (
-  "strings"
-  logger "github.com/sirupsen/logrus"
+	"fmt"
+	"strings"
+
+	logger "github.com/sirupsen/logrus"
 )
 
 func TempInit() {
   logger.Info("Initializing temp Logger Module")
-  logger.SetLevel(0)
+  logger.SetLevel(logger.DebugLevel)
 }
 
 func Init(logLvlStr string) {
@@ -32,6 +34,7 @@ func Init(logLvlStr string) {
     logLvl = logger.InfoLevel
   }
 
+  logger.Info("Setting log level to: " + fmt.Sprint(logLvl))
   logger.SetLevel(logLvl)
 }
 

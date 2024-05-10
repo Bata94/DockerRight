@@ -1,5 +1,6 @@
 services:
   prod:
+    container_name: dockerright
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,12 +13,15 @@ services:
       TZ: Europe/Berlin
 
   dev:
+    container_name: dockerright
     build:
       context: .
       dockerfile: Dockerfile
       target: dev
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./backup:/opt/DockerRight/backup
+      - ./config:/opt/DockerRight/config
       - ./:/opt/DockerRight
     environment:
       TZ: Europe/Berlin

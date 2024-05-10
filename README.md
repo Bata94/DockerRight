@@ -39,6 +39,7 @@ Minimal Docker-Compose File:
 ``` yaml
 services:
   dockerright:
+    container_name: dockerright
     image: ghcr.io/bata94/dockerright:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -48,6 +49,7 @@ services:
       TZ: Europe/Berlin
 ```
 
+To run the service successfully the containername needs to be "dockerright"!
 Start the Container, it will stop after a few seconds on it's own.
 
 Now you edit the created config.json. 
@@ -89,6 +91,8 @@ Those points are roughly in order of importance (for me):
 - [ ] Mail Notifications
 - [ ] Discord Notifications
 - [ ] Logs to File
+- [ ] Fix Monitor only Loop
+- [ ] Enable concurrent backups
 - [ ] BackupContainer Output to File
 - [ ] Make config parameters settable by environment variables
 - [ ] Mount Container Volumes/Binds as read only, for safety
