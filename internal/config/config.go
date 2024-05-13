@@ -1,8 +1,8 @@
 package config
 
 import (
-  "errors"
 	"encoding/json"
+	"errors"
 	"os"
 	"runtime"
 
@@ -16,7 +16,7 @@ var (
 
 func Init(configPath string) Config {
 	log.Info("Initializing Config Module")
-  var err error
+	var err error
 	ConfigPath = configPath
 
 	if ConfigPath == "" {
@@ -24,27 +24,27 @@ func Init(configPath string) Config {
 	}
 
 	Conf = Config{}
-  err = Conf.SetDefaults()
-  if err != nil {
-    log.Fatal("Error setting defaults: ", err)
-  }
+	err = Conf.SetDefaults()
+	if err != nil {
+		log.Fatal("Error setting defaults: ", err)
+	}
 
 	if _, err := os.Stat(ConfigPath); os.IsNotExist(err) {
 		log.Info("Config file not found generating defaults!")
 		err = Conf.Save()
-    if err != nil {
-      log.Fatal("Error saving Config: ", err)
-    }
+		if err != nil {
+			log.Fatal("Error saving Config: ", err)
+		}
 	}
 
 	err = Conf.Load()
-  if err != nil {
-    log.Fatal("Error loading Config: ", err)
-  }
+	if err != nil {
+		log.Fatal("Error loading Config: ", err)
+	}
 	err = Conf.Save()
-  if err != nil {
-    log.Fatal("Error saving Config: ", err)
-  }
+	if err != nil {
+		log.Fatal("Error saving Config: ", err)
+	}
 	log.Info("Config loaded")
 
 	return Conf
@@ -88,14 +88,14 @@ func (c *Config) SetDefaults() error {
 
 func (c *Config) Load() error {
 	log.Info("Config Loading")
-  err := Conf.LoadFromFile()
-  if err != nil {
-    return err
-  }
-  err = Conf.LoadFromEnv()
-  if err != nil {
-    return err
-  }
+	err := Conf.LoadFromFile()
+	if err != nil {
+		return err
+	}
+	err = Conf.LoadFromEnv()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -121,11 +121,11 @@ func (c *Config) LoadFromFile() error {
 
 	confFile, err := os.ReadFile(ConfigPath)
 	if err != nil {
-    return errors.New("Error reading config file: " + err.Error())
+		return errors.New("Error reading config file: " + err.Error())
 	}
 	err = json.Unmarshal(confFile, &Conf)
 	if err != nil {
-    return errors.New("Error unmarshalling config file: " + err.Error())
+		return errors.New("Error unmarshalling config file: " + err.Error())
 	}
 
 	return nil
@@ -136,11 +136,11 @@ func (c *Config) Save() error {
 
 	confFile, err := json.MarshalIndent(Conf, "", " ")
 	if err != nil {
-    return errors.New("Error marshalling config file: " + err.Error())
+		return errors.New("Error marshalling config file: " + err.Error())
 	}
 	err = os.WriteFile(ConfigPath, confFile, 0o644)
 	if err != nil {
-    return errors.New("Error writing config file: " + err.Error())
+		return errors.New("Error writing config file: " + err.Error())
 	}
 
 	return nil

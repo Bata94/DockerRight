@@ -43,10 +43,10 @@ func Init() {
 		log.Fatal(err)
 	}
 	defer reader.Close()
-  _, err = io.Copy(os.Stdout, reader)
-  if err != nil {
-    log.Fatal(err)
-  }
+	_, err = io.Copy(os.Stdout, reader)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if config.Conf.CreateTestContainerOnStartup {
 		log.Info("Creating test container")
@@ -90,17 +90,17 @@ func PullImage(imageName string) error {
 	if pull {
 		log.Debug("Pulling Image")
 		reader, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
-    if err != nil {
-      return errors.New("Error pulling image: " + err.Error())
-    }
+		if err != nil {
+			return errors.New("Error pulling image: " + err.Error())
+		}
 		defer reader.Close()
 		if err != nil {
 			return errors.New("Error pulling image: " + err.Error())
 		}
 		_, err = io.Copy(os.Stdout, reader)
-    if err != nil {
-      return errors.New("Error pulling image: " + err.Error())
-    }
+		if err != nil {
+			return errors.New("Error pulling image: " + err.Error())
+		}
 	}
 
 	return nil
@@ -186,9 +186,9 @@ func RunContainer(p RunContainerParams) error {
 		ShowStderr: true,
 		Follow:     true,
 	})
-  if err != nil {
-    log.Error("Error getting logs: ", err)
-  }
+	if err != nil {
+		log.Error("Error getting logs: ", err)
+	}
 	defer out.Close()
 	if err != nil {
 		log.Error(err)
@@ -276,11 +276,11 @@ func BackupContainers() error {
 
 	log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
 	output, err := RunOSCmd(config.Conf.BeforeBackupCMD)
-  if err != nil {
-    log.Error("Error running BeforeBackupCMD: ", err)
-  } else {
-    log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
-  }
+	if err != nil {
+		log.Error("Error running BeforeBackupCMD: ", err)
+	} else {
+		log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
+	}
 
 	for _, ctr := range containers {
 		// Skip dockerright named containers
@@ -303,11 +303,11 @@ func BackupContainers() error {
 
 	log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
 	output, err = RunOSCmd(config.Conf.AfterBackupCMD)
-  if err != nil {
-    log.Error("Error running AfterBackupCMD: ", err)
-  } else {
-    log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
-  }
+	if err != nil {
+		log.Error("Error running AfterBackupCMD: ", err)
+	} else {
+		log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
+	}
 
 	log.Info("BackupContainers done")
 	err = DeleteOldBackups()
