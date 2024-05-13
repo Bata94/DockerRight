@@ -2,9 +2,9 @@ GOCMD=go
 BINARY_NAME=dockerright
 MAJOR_VERSION?=0
 MINOR_VERSION?=0
-PATCH_VERSION?=6
+PATCH_VERSION?=7
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
-DOCKER_REGISTRY?=ghcr.io/bata94/dockerright
+DOCKER_REGISTRY?=ghcr.io/bata94/
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 
 GREEN  := $(shell tput -Txterm setaf 2)
@@ -18,7 +18,7 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 build:
-	docker build --target prod --rm --tag $(BINARY_NAME) .
+	docker build --target prod --tag $(BINARY_NAME) .
 
 release-git:
 	git add .
@@ -29,13 +29,15 @@ release-git:
 
 release-docker:
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):latest
-	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION)
-	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION).$(MINOR_VERSION)
-	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
-
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):latest
+
+	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION)
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION)
+
+	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION).$(MINOR_VERSION)
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION).$(MINOR_VERSION)
+
+	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 
 auto-release: fmt-go build release-git release-docker

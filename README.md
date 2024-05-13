@@ -5,8 +5,10 @@
 * [Description](#description)
 * [Limitations/Warnings](#limitations-warnings)
 * [How to use](#how-to-use)
+* [VersionTags](#available-versiontags)
 * [Configuration](#configuration)
 * [TODOs](#todos)
+* [Patchnotes](#patchnotes)
 * [License](#license)
 
 ## Description
@@ -60,6 +62,22 @@ A restart option might be a good idea, for such a service, but it's easier to se
 
 If you don't set Before- or AfterBackupCMDs that would need network access, you should set the Docker Network to "none".
 
+### Available VersionTags
+
+| Tag       | Description                                   |
+|-----------|-----------------------------------------------|
+| `latest`  | The latest stable version                     |
+| `0`       | The latest Major version                      |
+| `0.0`     | The latest Minor version                      |
+| `0.0.X`   | Specific patch (see releases for versions)    |
+
+DockerRight uses Semantic Versioning, so you can lock the Image Version to a specific tag, as shown above.
+
+When all ToDos are completed I will move to Major 1 :)\
+Most ToDos should increase the Minor by 1.
+
+[The Patchnotes can be found here](#patchnotes)
+
 ### Configuration
 
 Parameters that can be set in the config.json. To reset them, delete the config.json and restart the container.
@@ -104,6 +122,25 @@ Those points are roughly in order of importance (for me):
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
 - [ ] WebUI for Configuration, Monitoring and Dashboard
+
+## Patchnotes
+
+If a specific Version is not listed here, eventhough it was released, it might only be a refactor or super minor change, without changes for the user.
+As the development is rapid I might skip the patchnotes for a version!
+
+### 0.0.6
+
+- Some refactoring and optimization
+- Bugfixes, specially with finding the BackupPath of the DockerRightContainer on Host
+- Build pipeline changes and CD testing
+
+### 0.0.4
+
+- Deletes old backups now
+
+### 0.0.1
+
+- Initial Release
 
 ## License
 
