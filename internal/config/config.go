@@ -1,7 +1,7 @@
 package config
 
 import (
-  "DockerRight/pkg/log"
+  "github.com/bata94/DockerRight/internal/log"
 
   "os"
   "encoding/json"

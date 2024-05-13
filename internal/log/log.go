@@ -1,5 +1,8 @@
 package log
 
+// A Wrapper for the logrus logger
+// maybe useful in the future :D
+
 import (
 	"fmt"
 	"strings"

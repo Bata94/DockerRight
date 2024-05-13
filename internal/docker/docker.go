@@ -1,8 +1,8 @@
 package docker
 
 import (
-	"DockerRight/pkg/config"
-	"DockerRight/pkg/log"
+	"github.com/bata94/DockerRight/internal/config"
+	"github.com/bata94/DockerRight/internal/log"
 	"errors"
 
 	"context"

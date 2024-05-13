@@ -1,4 +1,4 @@
-module DockerRight
+module github.com/bata94/DockerRight
 
 go 1.21.9
 

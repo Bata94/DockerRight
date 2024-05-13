@@ -4,10 +4,10 @@ import (
   "time"
   "os"
 
-	"DockerRight/pkg/config"
-	"DockerRight/pkg/docker"
-  "DockerRight/pkg/log"
-  "DockerRight/pkg/notify"
+	"github.com/bata94/DockerRight/internal/config"
+	"github.com/bata94/DockerRight/internal/docker"
+  "github.com/bata94/DockerRight/internal/log"
+  "github.com/bata94/DockerRight/internal/notify"
 )
 
 func init() {

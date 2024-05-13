@@ -1,7 +1,7 @@
 package notify
 
 import (
-  "DockerRight/pkg/log"
+  "github.com/bata94/DockerRight/internal/log"
 )
 
 func Init() {
