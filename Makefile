@@ -1,6 +1,9 @@
 GOCMD=go
 BINARY_NAME=dockerright
-VERSION?=0.0.4
+MAJOR_VERSION?=0
+MINOR_VERSION?=0
+PATCH_VERSION?=6
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 DOCKER_REGISTRY?=ghcr.io/bata94/dockerright
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
 
@@ -22,12 +25,17 @@ release-git:
 	git commit -m "Release version $(VERSION)"
 	git tag -a $(VERSION) -m "Release version $(VERSION)"
 	git push
+	git push --tags
 
 release-docker:
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):latest
+	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION)
+	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION).$(MINOR_VERSION)
 	docker tag $(BINARY_NAME) $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):latest
+	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION)
+	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(MAJOR_VERSION).$(MINOR_VERSION)
 	docker push $(DOCKER_REGISTRY)$(BINARY_NAME):$(VERSION)
 
 auto-release: fmt-go build release-git release-docker

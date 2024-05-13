@@ -13,7 +13,10 @@ import (
 func init() {
 	log.Info("Initializing DockerRight")
 	log.TempInit()
-	os.Mkdir("./config", 0o755)
+  err := os.Mkdir("./config", 0o755)
+  if err != nil {
+    log.Fatal("Error creating config directory: ", err)
+  }
 	config.Init("./config/config.json")
 	log.Init(config.Conf.LogLevel)
 	docker.Init()
@@ -23,14 +26,21 @@ func init() {
 func main() {
 	log.Info("Starting DockerRight")
 
-	if config.Conf.EnableBackup == false && config.Conf.EnableMonitor == false {
+	if !config.Conf.EnableBackup && !config.Conf.EnableMonitor {
 		log.Warn("DockerRight is disabled! Edit the config file and restart :)")
 		return
 	}
 
 	if config.Conf.BackupOnStartup && config.Conf.EnableBackup {
 		log.Info("Running DockerRight on startup")
-		docker.BackupContainers()
+    err := docker.BackupContainers()
+    if err != nil {
+      if config.Conf.EnableMonitor {
+        log.Error(err)
+      } else {
+        log.Fatal(err)
+      }
+    }
 	}
 
 	if config.Conf.EnableMonitor {
@@ -71,8 +81,12 @@ func main() {
 
 func monitorLoop() {
 	sleepDur := time.Duration(config.Conf.MonitorIntervalSeconds) * time.Second
-	for true {
-		docker.MonitorContainers()
+	for {
+    err := docker.MonitorContainers()
+    if err != nil {
+      log.Error(err)
+      // TODO: Handle error, notify user of crash
+    }
 		log.Info("Sleeping for ", sleepDur, "...")
 		time.Sleep(sleepDur)
 	}

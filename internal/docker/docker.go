@@ -43,7 +43,10 @@ func Init() {
 		log.Fatal(err)
 	}
 	defer reader.Close()
-	io.Copy(os.Stdout, reader)
+  _, err = io.Copy(os.Stdout, reader)
+  if err != nil {
+    log.Fatal(err)
+  }
 
 	if config.Conf.CreateTestContainerOnStartup {
 		log.Info("Creating test container")
@@ -87,12 +90,17 @@ func PullImage(imageName string) error {
 	if pull {
 		log.Debug("Pulling Image")
 		reader, err := cli.ImagePull(ctx, imageName, image.PullOptions{})
+    if err != nil {
+      return errors.New("Error pulling image: " + err.Error())
+    }
 		defer reader.Close()
 		if err != nil {
-			log.Error("Error pulling image: ")
-			return err
+			return errors.New("Error pulling image: " + err.Error())
 		}
-		io.Copy(os.Stdout, reader)
+		_, err = io.Copy(os.Stdout, reader)
+    if err != nil {
+      return errors.New("Error pulling image: " + err.Error())
+    }
 	}
 
 	return nil
@@ -178,6 +186,9 @@ func RunContainer(p RunContainerParams) error {
 		ShowStderr: true,
 		Follow:     true,
 	})
+  if err != nil {
+    log.Error("Error getting logs: ", err)
+  }
 	defer out.Close()
 	if err != nil {
 		log.Error(err)
@@ -220,7 +231,7 @@ func GetHostBackupPath(containers []types.Container) string {
 				log.Debug(m)
 				log.Debug("BackupPathConf: " + config.Conf.BackupPath)
 				log.Debug("MountDestination: " + m.Destination)
-				if strings.ToLower(m.Destination) == strings.ToLower(config.Conf.BackupPath) {
+				if strings.EqualFold(m.Destination, config.Conf.BackupPath) {
 					hostBackupPath = m.Source
 				}
 			}
@@ -265,7 +276,11 @@ func BackupContainers() error {
 
 	log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
 	output, err := RunOSCmd(config.Conf.BeforeBackupCMD)
-	log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
+  if err != nil {
+    log.Error("Error running BeforeBackupCMD: ", err)
+  } else {
+    log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
+  }
 
 	for _, ctr := range containers {
 		// Skip dockerright named containers
@@ -288,7 +303,11 @@ func BackupContainers() error {
 
 	log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
 	output, err = RunOSCmd(config.Conf.AfterBackupCMD)
-	log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
+  if err != nil {
+    log.Error("Error running AfterBackupCMD: ", err)
+  } else {
+    log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
+  }
 
 	log.Info("BackupContainers done")
 	err = DeleteOldBackups()
@@ -312,7 +331,7 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 	now := time.Now()
 
 	backupPathBase := config.Conf.BackupPath
-	if strings.HasSuffix(backupPathBase, "/") == false {
+	if !strings.HasSuffix(backupPathBase, "/") {
 		backupPathBase = backupPathBase + "/"
 	}
 	backupPath := backupPathBase + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05")

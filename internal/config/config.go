@@ -1,6 +1,7 @@
 package config
 
 import (
+  "errors"
 	"encoding/json"
 	"os"
 	"runtime"
@@ -15,6 +16,7 @@ var (
 
 func Init(configPath string) Config {
 	log.Info("Initializing Config Module")
+  var err error
 	ConfigPath = configPath
 
 	if ConfigPath == "" {
@@ -22,15 +24,27 @@ func Init(configPath string) Config {
 	}
 
 	Conf = Config{}
-	Conf.SetDefaults()
+  err = Conf.SetDefaults()
+  if err != nil {
+    log.Fatal("Error setting defaults: ", err)
+  }
 
 	if _, err := os.Stat(ConfigPath); os.IsNotExist(err) {
 		log.Info("Config file not found generating defaults!")
-		Conf.Save()
+		err = Conf.Save()
+    if err != nil {
+      log.Fatal("Error saving Config: ", err)
+    }
 	}
 
-	Conf.Load()
-	Conf.Save()
+	err = Conf.Load()
+  if err != nil {
+    log.Fatal("Error loading Config: ", err)
+  }
+	err = Conf.Save()
+  if err != nil {
+    log.Fatal("Error saving Config: ", err)
+  }
 	log.Info("Config loaded")
 
 	return Conf
@@ -74,8 +88,14 @@ func (c *Config) SetDefaults() error {
 
 func (c *Config) Load() error {
 	log.Info("Config Loading")
-	Conf.LoadFromFile()
-	Conf.LoadFromEnv()
+  err := Conf.LoadFromFile()
+  if err != nil {
+    return err
+  }
+  err = Conf.LoadFromEnv()
+  if err != nil {
+    return err
+  }
 	return nil
 }
 
@@ -101,11 +121,11 @@ func (c *Config) LoadFromFile() error {
 
 	confFile, err := os.ReadFile(ConfigPath)
 	if err != nil {
-		log.Fatal("Error reading config file" + err.Error())
+    return errors.New("Error reading config file: " + err.Error())
 	}
 	err = json.Unmarshal(confFile, &Conf)
 	if err != nil {
-		log.Fatal("Error unmarshalling config file" + err.Error())
+    return errors.New("Error unmarshalling config file: " + err.Error())
 	}
 
 	return nil
@@ -116,11 +136,11 @@ func (c *Config) Save() error {
 
 	confFile, err := json.MarshalIndent(Conf, "", " ")
 	if err != nil {
-		log.Fatal("Error marshalling config file" + err.Error())
+    return errors.New("Error marshalling config file: " + err.Error())
 	}
 	err = os.WriteFile(ConfigPath, confFile, 0o644)
 	if err != nil {
-		log.Fatal("Error writing config file" + err.Error())
+    return errors.New("Error writing config file: " + err.Error())
 	}
 
 	return nil
