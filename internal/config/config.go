@@ -1,15 +1,17 @@
 package config
 
 import (
-	"github.com/bata94/DockerRight/internal/log"
-
 	"encoding/json"
 	"os"
 	"runtime"
+
+	"github.com/bata94/DockerRight/internal/log"
 )
 
-var ConfigPath string
-var Conf Config
+var (
+	ConfigPath string
+	Conf       Config
+)
 
 func Init(configPath string) Config {
 	log.Info("Initializing Config Module")
@@ -116,7 +118,7 @@ func (c *Config) Save() error {
 	if err != nil {
 		log.Fatal("Error marshalling config file" + err.Error())
 	}
-	err = os.WriteFile(ConfigPath, confFile, 0644)
+	err = os.WriteFile(ConfigPath, confFile, 0o644)
 	if err != nil {
 		log.Fatal("Error writing config file" + err.Error())
 	}

@@ -1,11 +1,8 @@
 package docker
 
 import (
-	"errors"
-	"github.com/bata94/DockerRight/internal/config"
-	"github.com/bata94/DockerRight/internal/log"
-
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,8 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bata94/DockerRight/internal/config"
+	"github.com/bata94/DockerRight/internal/log"
 	"github.com/docker/docker/api/types"
-	// "github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/mount"
@@ -318,7 +316,7 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		backupPathBase = backupPathBase + "/"
 	}
 	backupPath := backupPathBase + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05")
-	err := os.MkdirAll(backupPath, 0755)
+	err := os.MkdirAll(backupPath, 0o755)
 	if err != nil {
 		log.Error(err)
 		return err

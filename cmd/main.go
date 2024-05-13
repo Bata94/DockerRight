@@ -13,7 +13,7 @@ import (
 func init() {
 	log.Info("Initializing DockerRight")
 	log.TempInit()
-	os.Mkdir("./config", 0755)
+	os.Mkdir("./config", 0o755)
 	config.Init("./config/config.json")
 	log.Init(config.Conf.LogLevel)
 	docker.Init()
