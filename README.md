@@ -1,5 +1,7 @@
 # DockerRight
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/bata94/DockerRight)](https://goreportcard.com/report/github.com/bata94/DockerRight)
+
 * [Description](#description)
 * [Limitations/Warnings](#limitations-warnings)
 * [How to use](#how-to-use)
