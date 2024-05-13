@@ -18,6 +18,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -342,7 +343,13 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		log.Debug(fmt.Sprintf("Creating container %s", containerName))
 
 		if strings.HasSuffix(m.Destination, ".sock") || strings.HasSuffix(m.Source, ".sock") {
-			log.Warn("Skipping mount %s:%s for Container %s because it contains a socket!", m.Destination, m.Source, containerName)
+			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it contains a socket!", m.Source, m.Destination, containerName}...)
+			continue
+		} else if m.Source == "/" {
+			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it is the root directory!", m.Source, m.Destination, containerName}...)
+			continue
+		} else if strings.Contains(m.Destination, "/var/lib/docker/volumes") {
+			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it is /var/lib/docker/volumes!", m.Source, m.Destination, containerName}...)
 			continue
 		}
 
