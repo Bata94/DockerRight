@@ -94,9 +94,6 @@ func PullImage(imageName string) error {
 			return errors.New("Error pulling image: " + err.Error())
 		}
 		defer reader.Close()
-		if err != nil {
-			return errors.New("Error pulling image: " + err.Error())
-		}
 		_, err = io.Copy(os.Stdout, reader)
 		if err != nil {
 			return errors.New("Error pulling image: " + err.Error())
@@ -343,6 +340,12 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 
 	for _, m := range container.Mounts {
 		log.Debug(fmt.Sprintf("Creating container %s", containerName))
+
+		if strings.HasSuffix(m.Destination, ".sock") || strings.HasSuffix(m.Source, ".sock") {
+			log.Warn("Skipping mount %s:%s for Container %s because it contains a socket!", m.Destination, m.Source, containerName)
+			continue
+		}
+
 		mountInfoFileName := fmt.Sprint(m.Type) + strings.Replace(m.Destination, "/", "_", -1)
 		cmd := []string{"tar", "cvf", "/opt/backup" + "/" + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05") + "/" + mountInfoFileName + ".tar", m.Destination}
 		log.Debug(cmd)
