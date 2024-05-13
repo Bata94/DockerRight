@@ -17,10 +17,9 @@ func TempInit() {
 
 func Init(logLvlStr string) {
 	logger.Info("Initializing final Logger Module")
-	logLvl := logger.InfoLevel
-	logLvlStr = strings.ToLower(logLvlStr)
+	var logLvl logger.Level
 
-	switch logLvlStr {
+	switch strings.ToLower(logLvlStr) {
 	case "debug":
 		logLvl = logger.DebugLevel
 	case "info":

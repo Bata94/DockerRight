@@ -212,16 +212,8 @@ func MonitorContainers() error {
 	return nil
 }
 
-func BackupContainers() error {
-	log.Info("BackupContainers")
+func GetHostBackupPath(containers []types.Container) string {
 	hostBackupPath := ""
-
-	containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
-	if err != nil {
-		log.Error("Error listing containers: ")
-		log.Error(err)
-		return err
-	}
 
 	for _, ctr := range containers {
 		log.Debug(ctr.Names)
@@ -237,25 +229,45 @@ func BackupContainers() error {
 		}
 	}
 
-	if hostBackupPath == "" {
-		err := errors.New("Error finding backup path! Maybe you changed the Dockerright Container name to something else then 'dockerright'?")
-		log.Error(err)
-		return err
-	}
+	return hostBackupPath
+}
 
-	if config.Conf.BeforeBackupCMD != "" {
-		log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
+func RunOSCmd(cmd string) ([]byte, error) {
+	if cmd != "" {
 		runCmd := exec.Command("sh", "-c", config.Conf.BeforeBackupCMD)
 
 		output, err := runCmd.Output()
 		if err != nil {
 			log.Error("Error running BeforeBackupCMD: ")
 			log.Error(err)
-			return err
+			return nil, err
 		}
-
-		log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
+		return output, nil
+	} else {
+		return nil, nil
 	}
+}
+
+func BackupContainers() error {
+	log.Info("BackupContainers")
+
+	containers, err := cli.ContainerList(context.Background(), container.ListOptions{All: true})
+	if err != nil {
+		log.Error("Error listing containers: ")
+		log.Error(err)
+		return err
+	}
+
+	hostBackupPath := GetHostBackupPath(containers)
+	if hostBackupPath == "" {
+		err := errors.New("Error finding backup path! Maybe you changed the Dockerright Container name to something else then 'dockerright'?")
+		log.Error(err)
+		return err
+	}
+
+	log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
+	output, err := RunOSCmd(config.Conf.BeforeBackupCMD)
+	log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
 
 	for _, ctr := range containers {
 		// Skip dockerright named containers
@@ -276,19 +288,9 @@ func BackupContainers() error {
 		}
 	}
 
-	if config.Conf.AfterBackupCMD != "" {
-		log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
-		runCmd := exec.Command("sh", "-c", config.Conf.AfterBackupCMD)
-
-		output, err := runCmd.Output()
-		if err != nil {
-			log.Error("Error running AfterBackupCMD: ")
-			log.Error(err)
-			return err
-		}
-
-		log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
-	}
+	log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
+	output, err = RunOSCmd(config.Conf.AfterBackupCMD)
+	log.Info("AfterBackupCMD ran successfully, Output:", "\n", string(output))
 
 	log.Info("BackupContainers done")
 	err = DeleteOldBackups()
