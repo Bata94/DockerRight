@@ -60,10 +60,10 @@ func (c *Config) SetDefaults() error {
   c.MonitorRetries = 5
   c.BackupHours = []int{}
   c.ConcurrentBackupContainer = (runtime.NumCPU() / 2)
-  c.BackupPath = "/opt/DockerRight/backup/"
+  c.BackupPath = "/opt/DockerRight/backup"
   c.BeforeBackupCMD = ""
   c.AfterBackupCMD = ""
-  c.LogLevel = "debug"
+  c.LogLevel = "info"
   c.BackupOnStartup = false
   c.CreateTestContainerOnStartup = true
 

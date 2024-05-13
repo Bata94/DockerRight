@@ -228,6 +228,8 @@ func BackupContainers() error {
     if strings.Contains(strings.ToLower(ctr.Names[0]), "dockerright") {
         for _, m := range ctr.Mounts {
           log.Debug(m)
+          log.Debug("BackupPathConf: " + config.Conf.BackupPath)
+          log.Debug("MountDestination: " + m.Destination)
           if strings.ToLower(m.Destination) == strings.ToLower(config.Conf.BackupPath) {
             hostBackupPath = m.Source
           }
