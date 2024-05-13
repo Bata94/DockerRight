@@ -101,6 +101,7 @@ Those points are roughly in order of importance (for me):
 - [ ] Backup Docker Compose Files/Run Parameters
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
+- [ ] WebUI for Configuration, Monitoring and Dashboard
 
 ## License
 
