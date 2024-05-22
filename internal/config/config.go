@@ -96,6 +96,7 @@ func (c *Config) Load() error {
 	if err != nil {
 		return err
 	}
+	log.Info("Config: ", log.FormatStruct(Conf))
 	return nil
 }
 

@@ -5,10 +5,31 @@ package log
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	logger "github.com/sirupsen/logrus"
 )
+
+func FormatStruct(v interface{}) string {
+	val := reflect.ValueOf(v)
+	typ := val.Type()
+
+	if typ.Kind() != reflect.Struct {
+		return "Provided value is not a struct"
+	}
+
+	retStr := "{\n"
+	for i := 0; i < val.NumField(); i++ {
+		field := typ.Field(i)
+		value := val.Field(i)
+
+		retStr += fmt.Sprintf("  %s: %v, \n", field.Name, value)
+	}
+	retStr += "}"
+
+	return retStr
+}
 
 func TempInit() {
 	logger.Info("Initializing temp Logger Module")
@@ -36,7 +57,7 @@ func Init(logLvlStr string) {
 		logLvl = logger.InfoLevel
 	}
 
-	logger.Info("Setting log level to: " + fmt.Sprint(logLvl))
+	logger.Info("Setting log level to: ", logLvl)
 	logger.SetLevel(logLvl)
 }
 
