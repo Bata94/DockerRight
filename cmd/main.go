@@ -48,26 +48,31 @@ func main() {
 		go monitorLoop()
 	}
 
-	lastBackupHour := -1
+	lastBackup := ""
 	for config.Conf.EnableBackup {
 		curHour := time.Now().Hour()
+		curBackup := time.Now().Format("2006-01-02T15")
+
 		log.Debug("Current hour: ", curHour)
+		log.Debug("Current Date: ", curBackup)
+		log.Debug("Last Backup Date: ", lastBackup)
 		log.Debug("BackupHours: ", config.Conf.BackupHours)
+
 		for _, hour := range config.Conf.BackupHours {
-			if hour == curHour && lastBackupHour != hour {
+			if hour == curHour && lastBackup != curBackup {
 				log.Debug("Running backup at hour: ", hour)
 				err := docker.BackupContainers()
 				if err != nil {
 					log.Error(err)
 				} else {
-					lastBackupHour = hour
+					lastBackup = curBackup
 				}
 			}
 		}
 		minutes2FullHour := 60 - time.Now().Minute()
 		log.Debug("minutes2FullHour: ", minutes2FullHour)
 		if minutes2FullHour < 0 {
-			log.Warn("minutes2FullHour < 0, setting minutes2FullHour to 2")
+			log.Warn("minutes2FullHour < 0, setting minutes2FullHour to 2... This should not been happening, please report this as a bug!")
 			minutes2FullHour = 2
 		} else if minutes2FullHour >= 10 {
 			log.Debug("minutes2FullHour >= 10, setting minutes2FullHour to 10")
