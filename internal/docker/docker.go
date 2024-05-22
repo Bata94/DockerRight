@@ -18,7 +18,6 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -317,11 +316,11 @@ func BackupContainers() error {
 }
 
 func RunBackupHelperForContainer(container types.Container, hostBackupPath string) error {
-	log.Debug("RunBackupHelperForContainer" + container.Names[0])
-	log.Debug(fmt.Sprintf("%s %s %s (status: %s)\n", container.ID, container.Names, container.Image, container.Status))
+	log.Info("RunBackupHelperForContainer" + container.Names[0])
+	log.Info(fmt.Sprintf("%s %s %s (status: %s)\n", container.ID, container.Names, container.Image, container.Status))
 
 	if container.Mounts == nil || len(container.Mounts) == 0 {
-		log.Debug("Container has no mounts")
+		log.Info("Container has no mounts")
 		return nil
 	}
 
@@ -340,16 +339,16 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 	}
 
 	for _, m := range container.Mounts {
-		log.Debug(fmt.Sprintf("Creating container %s", containerName))
+		log.Info(fmt.Sprintf("Creating container %s", containerName))
 
 		if strings.HasSuffix(m.Destination, ".sock") || strings.HasSuffix(m.Source, ".sock") {
-			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it contains a socket!", m.Source, m.Destination, containerName}...)
+			log.Warn(fmt.Sprintf("Skipping mount %s : %s for Container %s because it contains a socket!", m.Source, m.Destination, containerName))
 			continue
 		} else if m.Source == "/" {
-			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it is the root directory!", m.Source, m.Destination, containerName}...)
+			log.Warn(fmt.Sprintf("Skipping mount %s : %s for Container %s because it is the root directory!", m.Source, m.Destination, containerName))
 			continue
 		} else if strings.Contains(m.Destination, "/var/lib/docker/volumes") {
-			logrus.Warn([]interface{}{"Skipping mount %s : %s for Container %s because it is /var/lib/docker/volumes!", m.Source, m.Destination, containerName}...)
+			log.Warn(fmt.Sprintf("Skipping mount %s : %s for Container %s because it is /var/lib/docker/volumes!", m.Source, m.Destination, containerName))
 			continue
 		}
 

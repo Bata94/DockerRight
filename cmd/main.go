@@ -51,11 +51,11 @@ func main() {
 	lastBackupHour := -1
 	for config.Conf.EnableBackup {
 		curHour := time.Now().Hour()
-		log.Info("Current hour: ", curHour)
-		log.Info("BackupHours: ", config.Conf.BackupHours)
+		log.Debug("Current hour: ", curHour)
+		log.Debug("BackupHours: ", config.Conf.BackupHours)
 		for _, hour := range config.Conf.BackupHours {
 			if hour == curHour && lastBackupHour != hour {
-				log.Info("Running backup at hour: ", hour)
+				log.Debug("Running backup at hour: ", hour)
 				err := docker.BackupContainers()
 				if err != nil {
 					log.Error(err)
@@ -65,16 +65,16 @@ func main() {
 			}
 		}
 		minutes2FullHour := 60 - time.Now().Minute()
-		log.Info("minutes2FullHour: ", minutes2FullHour)
+		log.Debug("minutes2FullHour: ", minutes2FullHour)
 		if minutes2FullHour < 0 {
 			log.Warn("minutes2FullHour < 0, setting minutes2FullHour to 2")
 			minutes2FullHour = 2
 		} else if minutes2FullHour >= 10 {
-			log.Info("minutes2FullHour >= 10, setting minutes2FullHour to 10")
+			log.Debug("minutes2FullHour >= 10, setting minutes2FullHour to 10")
 			minutes2FullHour = 10
 		}
 		sleepDur := time.Duration(minutes2FullHour) * time.Second * 60
-		log.Info("Sleeping for ", sleepDur, "...")
+		log.Debug("Sleeping for ", sleepDur, "...")
 		time.Sleep(sleepDur)
 	}
 }
