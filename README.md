@@ -92,21 +92,21 @@ Parameters are evaluated as follows:
     2. config.json
     3. default values
 
-| Parameter (config.json)       | Parameter (EnvVar)               | Default                    | Type     | Description                                                   |
-|-------------------------------|----------------------------------|----------------------------|----------|---------------------------------------------------------------|
-| EnableBackup                  | ENABLE_BACKUP                    | false                      | Bool     | Enable backup service                                         |
-| EnableMonitor                 | ENABLE_MONITOR                   | false                      | Bool     | Enable monitor service                                        |
-| MonitorIntervalSeconds        | MONITOR_INTERVAL_SECONDS         | 60                         | Int      | Interval in seconds                                           |
-| MonitorReties                 | MONITOR_RETIES                   | 5                          | Int      | Retries before sending notification                           |
-| BackupHours                   | BACKUP_HOURS                     | []                         | []Int    | Backup at these hours                                         |
-| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Retention in hours (24 * 5)                                   |
-| ConcurrentBackupContainer     | CONCURRENT_BACKUP_CONTAINER      | numCPUs/2                  | Int      | How many mounts should be backed up at once                   |
-| BackupPath                    | BACKUP_PATH                      | "/opt/DockerRight/backup"  | String   | Backup Path inside container (shouldn't be changed)           |
-| BeforeBackupCMD               | BEFORE_BACKUP_CMD                | ""                         | String   | CMD to execute before backup                                  |
-| AfterBackupCMD                | AFTER_BACKUP_CMD                 | ""                         | String   | CMD to execute after backup                                   |
-| LogLevel                      | LOG_LEVEL                        | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)         |
-| BackupOnStartup               | BACKUP_ON_STARTUP                | false                      | Bool     | Start a Backup on startup                                     |
-| CreateTestContainerOnStartup  | CREATE_TEST_CONTAINER_ON_STARTUP | true                       | Bool     | Create a TestContainer on startup, to check docker.sock       |
+| Parameter (config.json)       | Parameter (EnvVar)               | Default                    | Type     | Description                                                            |
+|-------------------------------|----------------------------------|----------------------------|----------|------------------------------------------------------------------------|
+| EnableBackup                  | ENABLE_BACKUP                    | false                      | Bool     | Enable backup service                                                  |
+| EnableMonitor                 | ENABLE_MONITOR                   | false                      | Bool     | Enable monitor service                                                 |
+| MonitorIntervalSeconds        | MONITOR_INTERVAL_SECONDS         | 60                         | Int      | Interval in seconds                                                    |
+| MonitorReties                 | MONITOR_RETIES                   | 5                          | Int      | Retries before sending notification                                    |
+| BackupHours                   | BACKUP_HOURS                     | []                         | []Int    | Backup at these hours                                                  |
+| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Retention in hours (24 * 5)                                            |
+| ConcurrentBackupContainer     | CONCURRENT_BACKUP_CONTAINER      | numCPUs/2                  | Int      | How many mounts should be backed up at once                            |
+| BackupPath                    | BACKUP_PATH                      | "/opt/DockerRight/backup"  | String   | Backup Path inside container (shouldn't be changed)                    |
+| BeforeBackupCMD               | BEFORE_BACKUP_CMD                | ""                         | String   | CMD to execute before backup                                           |
+| AfterBackupCMD                | AFTER_BACKUP_CMD                 | ""                         | String   | CMD to execute after backup                                            |
+| LogLevel                      | LOG_LEVEL                        | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)                  |
+| BackupOnStartup               | BACKUP_ON_STARTUP                | false                      | Bool     | Start a Backup on startup, won't run again if started in a BackupHour  |
+| CreateTestContainerOnStartup  | CREATE_TEST_CONTAINER_ON_STARTUP | true                       | Bool     | Create a TestContainer on startup, to check docker.sock                |
 
 ## TODOs
 
@@ -118,8 +118,8 @@ Those points are roughly in order of importance (for me):
 - [X] Delete old Backups
 - [X] Make config parameters settable by environment variables
 - [X] Add VersionTag to startup console output
-- [ ] Better DockerBackupHelperNames, that reflect ContainerName and Mount
-- [ ] Enable concurrent backups
+- [X] Better DockerBackupHelperNames, that reflect ContainerName and Mount
+- [X] Enable concurrent backups
 - [ ] BackupContainer Output to File
 - [ ] Backup Docker Compose Files/Run Parameters
 - [ ] Logs to File

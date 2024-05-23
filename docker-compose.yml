@@ -28,7 +28,7 @@ services:
       - ./:/opt/DockerRight
     environment:
       TZ: Europe/Berlin
-      LOG_LEVEL: "debug"
+      LOG_LEVEL: "info"
       ENABLE_BACKUP: true
       ENABLE_MONITOR: false
       BACKUP_ON_STARTUP: true
