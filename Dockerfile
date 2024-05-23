@@ -1,5 +1,10 @@
+ARG VERSION_BUILD=${VERSION_BUILD}
+
 ### BASE
 FROM golang:1.22-bookworm as base
+
+ARG VERSION_BUILD
+ENV VERSION=$VERSION_BUILD
 
 WORKDIR /opt/DockerRight
 
@@ -10,6 +15,9 @@ RUN go mod tidy
 ### PRODUCTION-BUILDER
 FROM base as prod-builder
 
+ARG VERSION_BUILD
+ENV VERSION=$VERSION_BUILD
+
 WORKDIR /opt/DockerRight
 
 COPY --from=base /opt/DockerRight .
@@ -18,6 +26,9 @@ RUN go build -o ./DockerRight cmd/main.go
 
 ### PRODUCTION
 FROM golang:1.22-bookworm as prod
+
+ARG VERSION_BUILD
+ENV VERSION=$VERSION_BUILD
 
 WORKDIR /opt/DockerRight
 

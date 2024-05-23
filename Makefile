@@ -18,7 +18,7 @@ RESET  := $(shell tput -Txterm sgr0)
 all: help
 
 build:
-	docker build --target prod --tag $(BINARY_NAME) .
+	docker build --target prod --build-arg VERSION_BUILD=$(VERSION) --tag $(BINARY_NAME) .
 
 release-git:
 	git add .

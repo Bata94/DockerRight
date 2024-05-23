@@ -2,11 +2,12 @@
 services:
   prod:
     container_name: dockerright
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: prod
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    #   target: prod
     # image: ghcr.io/bata94/dockerright:latest
+    image: dr_test
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./backup:/opt/DockerRight/backup
@@ -27,16 +28,16 @@ services:
       - ./:/opt/DockerRight
     environment:
       TZ: Europe/Berlin
-      LOG_LEVEL: "info"
-      ENABLE_BACKUP: false
+      LOG_LEVEL: "debug"
+      ENABLE_BACKUP: true
       ENABLE_MONITOR: false
-      BACKUP_ON_STARTUP: false
-      CREATE_TEST_CONTAINER_ON_STARTUP: false
+      BACKUP_ON_STARTUP: true
+      CREATE_TEST_CONTAINER_ON_STARTUP: true
       BEFORE_BACKUP_CMD: "uname -a"
       AFTER_BACKUP_CMD: "ls -al /opt/DockerRight/backup"
       BACKUP_PATH: "/opt/DockerRight/backup"
-      BACKUP_HOURS: "[2,4,6,8,10]"
-      MONITOR_INTERVAL_SECONDS: 10
-      MONITOR_RETIES: 3
+      BACKUP_HOURS: "[0,2,4,6,8,10,12,14,16,18,20,22]"
+      MONITOR_INTERVAL_SECONDS: 60
+      MONITOR_RETIES: 5
       RETENTION_HOURS: 24
-      CONCURRENT_BACKUP_CONTAINERS: 1
+      CONCURRENT_BACKUP_CONTAINERS: 8
