@@ -117,23 +117,26 @@ Those points are roughly in order of importance (for me):
 - [X] Create Backups per mount
 - [X] Delete old Backups
 - [X] Make config parameters settable by environment variables
-- [ ] Add VersionTag to startup console output
-- [ ] Backup Docker Compose Files/Run Parameters
-- [ ] BackupContainer Output to File
+- [X] Add VersionTag to startup console output
+- [ ] Better DockerBackupHelperNames, that reflect ContainerName and Mount
 - [ ] Enable concurrent backups
+- [ ] BackupContainer Output to File
+- [ ] Backup Docker Compose Files/Run Parameters
 - [ ] Logs to File
 - [ ] Telegram Notifications
 - [ ] Mail Notifications
 - [ ] Discord Notifications
 - [ ] Monitor Docker Containers
 - [ ] Fix Monitor only Loop
+- [ ] Refactor!!!
 - [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
 - [ ] SSH, SFTP, S3, NFS, SMB Backup location options
-- [ ] Add tests
+- [ ] Refactor!!!
 - [ ] WebUI for Configuration, Monitoring and Dashboard
+- [ ] Add tests :D
 
 ## Patchnotes
 
