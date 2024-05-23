@@ -12,6 +12,8 @@ import (
 
 	"github.com/bata94/DockerRight/internal/config"
 	"github.com/bata94/DockerRight/internal/log"
+	"github.com/bata94/DockerRight/internal/workpool"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
@@ -279,6 +281,7 @@ func BackupContainers() error {
 		log.Info("BeforeBackupCMD ran successfully, Output:", "\n", string(output))
 	}
 
+	var wg workpool.WaitGroupCount
 	for _, ctr := range containers {
 		// Skip dockerright named containers
 		skip := false
@@ -292,11 +295,21 @@ func BackupContainers() error {
 			continue
 		}
 
-		backupErr := RunBackupHelperForContainer(ctr, hostBackupPath)
-		if backupErr != nil {
-			continue
+		wg.Add(1)
+		log.Info("Current concurrent BackupRunners: ", wg.GetCount())
+		for wg.GetCount() > config.Conf.ConcurrentBackupContainer {
+			time.Sleep(time.Duration(time.Millisecond * 250))
 		}
+		go func(ctr types.Container) {
+			backupErr := RunBackupHelperForContainer(ctr, hostBackupPath)
+
+			defer wg.Done()
+			if backupErr != nil {
+				log.Error("Error in concurrent backup runner ", ctr.Names[0], " Error: ", backupErr)
+			}
+		}(ctr)
 	}
+	wg.Wait()
 
 	log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
 	output, err = RunOSCmd(config.Conf.AfterBackupCMD)
@@ -340,7 +353,6 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 	}
 
 	for i, m := range container.Mounts {
-		//WIP!!
 		containerName := fmt.Sprint(containerNameBase, "-m", i, "-", strings.ReplaceAll(m.Destination, "/", "_"))
 		log.Info(fmt.Sprintf("Creating container %s", containerName))
 
@@ -376,6 +388,7 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 			return err
 		}
 	}
+	time.Sleep(time.Second * 5)
 
 	return nil
 }
