@@ -5,6 +5,8 @@ import (
 	"errors"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 
 	"github.com/bata94/DockerRight/internal/log"
 )
@@ -103,7 +105,54 @@ func (c *Config) Load() error {
 func (c *Config) LoadFromEnv() error {
 	log.Info("Config LoadFromEnv")
 
-	// TODO: Implement this!
+	// TODO: Refactor into functions
+	// Bool Values
+	if os.Getenv("ENABLE_BACKUP") != "" {
+		enableBackupVar := strings.ToLower(os.Getenv("ENABLE_BACKUP"))
+		if enableBackupVar == "true" {
+			c.EnableBackup = true
+		} else if enableBackupVar == "false" {
+			c.EnableBackup = false
+		} else {
+			log.Error("Environment Variable 'ENABLE_BACKUP' could not be parsed... value read: ", enableBackupVar)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		}
+	}
+	if os.Getenv("ENABLE_MONITOR") != "" {
+		enableMonitorVar := strings.ToLower(os.Getenv("ENABLE_MONITOR"))
+		if enableMonitorVar == "true" {
+			c.EnableMonitor = true
+		} else if enableMonitorVar == "false" {
+			c.EnableMonitor = false
+		} else {
+			log.Error("Environment Variable 'ENABLE_BACKUP' could not be parsed... value read: ", enableMonitorVar)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		}
+	}
+	if os.Getenv("BACKUP_ON_STARTUP") != "" {
+		backupOnStartupVar := strings.ToLower(os.Getenv("BACKUP_ON_STARTUP"))
+		if backupOnStartupVar == "true" {
+			c.BackupOnStartup = true
+		} else if backupOnStartupVar == "false" {
+			c.BackupOnStartup = false
+		} else {
+			log.Error("Environment Variable 'ENABLE_MONITOR' could not be parsed... value read: ", backupOnStartupVar)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		}
+	}
+	if os.Getenv("CREATE_TEST_CONTAINER_ON_STARTUP") != "" {
+		createTestContainerOnStartup := strings.ToLower(os.Getenv("CREATE_TEST_CONTAINER_ON_STARTUP"))
+		if createTestContainerOnStartup == "true" {
+			c.BackupOnStartup = true
+		} else if createTestContainerOnStartup == "false" {
+			c.BackupOnStartup = false
+		} else {
+			log.Error("Environment Variable 'CREATE_TEST_CONTAINER_ON_STARTUP' could not be parsed... value read: ", createTestContainerOnStartup)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		}
+	}
+
+	// String Values
 	if os.Getenv("BACKUP_PATH") != "" {
 		c.BackupPath = os.Getenv("BACKUP_PATH")
 	}
@@ -112,6 +161,90 @@ func (c *Config) LoadFromEnv() error {
 	}
 	if os.Getenv("AFTER_BACKUP_CMD") != "" {
 		c.AfterBackupCMD = os.Getenv("AFTER_BACKUP_CMD")
+	}
+	if os.Getenv("LOG_LEVEL") != "" {
+		c.LogLevel = os.Getenv("LOG_LEVEL")
+	}
+
+	// List Values
+	if os.Getenv("BACKUP_HOURS") != "" {
+		backupHoursVar := os.Getenv("BACKUP_HOURS")
+		backupHours := []int{}
+
+		// String cleanup
+		backupHoursVar = strings.ReplaceAll(backupHoursVar, "[", "")
+		backupHoursVar = strings.ReplaceAll(backupHoursVar, "]", "")
+		backupHoursVar = strings.ReplaceAll(backupHoursVar, " ", "")
+
+		backupHoursStrList := strings.Split(backupHoursVar, ",")
+
+		for _, s := range backupHoursStrList {
+			hourInt, err := strconv.Atoi(s)
+
+			if err != nil {
+				log.Debug(err, s)
+
+				log.Error("Environment Variable 'BACKUP_HOURS' could not be parsed... value read: ", backupHoursVar)
+				log.Warn("Falling back to value in 'config.json' or to default value!")
+				break
+			}
+
+			backupHours = append(backupHours, hourInt)
+		}
+
+		if len(backupHours) != 0 {
+			c.BackupHours = backupHours
+		}
+	}
+
+	// Int Values
+	if os.Getenv("MONITOR_INTERVAL_SECONDS") != "" {
+		val := os.Getenv("MONITOR_INTERVAL_SECONDS")
+		valInt, err := strconv.Atoi(val)
+
+		if err != nil {
+			log.Debug(err)
+			log.Error("Environment Variable 'MONITOR_INTERVAL_SECONDS' could not be parsed... value read: ", val)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		} else {
+			c.MonitorIntervalSeconds = valInt
+		}
+	}
+	if os.Getenv("MONITOR_RETIES") != "" {
+		val := os.Getenv("MONITOR_RETIES")
+		valInt, err := strconv.Atoi(val)
+
+		if err != nil {
+			log.Debug(err)
+			log.Error("Environment Variable 'MONITOR_RETIES' could not be parsed... value read: ", val)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		} else {
+			c.MonitorRetries = valInt
+		}
+	}
+	if os.Getenv("RETENTION_HOURS") != "" {
+		val := os.Getenv("RETENTION_HOURS")
+		valInt, err := strconv.Atoi(val)
+
+		if err != nil {
+			log.Debug(err)
+			log.Error("Environment Variable 'RETENTION_HOURS' could not be parsed... value read: ", val)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		} else {
+			c.RetentionHours = valInt
+		}
+	}
+	if os.Getenv("CONCURRENT_BACKUP_CONTAINER") != "" {
+		val := os.Getenv("CONCURRENT_BACKUP_CONTAINER")
+		valInt, err := strconv.Atoi(val)
+
+		if err != nil {
+			log.Debug(err)
+			log.Error("Environment Variable 'CONCURRENT_BACKUP_CONTAINER' could not be parsed... value read: ", val)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		} else {
+			c.ConcurrentBackupContainer = valInt
+		}
 	}
 
 	return nil

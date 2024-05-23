@@ -62,6 +62,8 @@ A restart option might be a good idea, for such a service, but it's easier to se
 
 If you don't set Before- or AfterBackupCMDs that would need network access, you should set the Docker Network to "none".
 
+If you don't want to use the ContainerRegistry, just git clone this repository and build your image. The Dockerfile and an example Composefile are already there.
+
 ### Available VersionTags
 
 | Tag       | Description                                   |
@@ -82,7 +84,13 @@ Most ToDos should increase the Minor by 1.
 
 Parameters that can be set in the config.json. To reset them, delete the config.json and restart the container.
 
-The Praraeters in the config.json are typed in UpperCamelCase. To use those Parameters in environment variables, the must be typed as UPPER_SNAKE_CASE.
+The Parameters in the config.json are typed in UpperCamelCase. To use those Parameters in environment variables, the must be typed as UPPER_SNAKE_CASE.
+
+Parameters are evaluated as follows:
+
+    1. EnvironmentVariables
+    2. config.json
+    3. default values
 
 | Parameter (config.json)       | Parameter (EnvVar)               | Default                    | Type     | Description                                                   |
 |-------------------------------|----------------------------------|----------------------------|----------|---------------------------------------------------------------|
@@ -117,7 +125,7 @@ Those points are roughly in order of importance (for me):
 - [ ] Fix Monitor only Loop
 - [ ] Enable concurrent backups
 - [ ] BackupContainer Output to File
-- [ ] Make config parameters settable by environment variables
+- [X] Make config parameters settable by environment variables
 - [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Add tests
