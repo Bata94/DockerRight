@@ -39,6 +39,8 @@ ENTRYPOINT ["/opt/DockerRight/DockerRight"]
 ### DEVELOPMENT 
 FROM base as dev
 
+ENV VERSION="Development"
+
 WORKDIR /opt/DockerRight
 
 COPY --from=base /opt/DockerRight .
