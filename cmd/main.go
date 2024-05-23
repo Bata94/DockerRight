@@ -37,6 +37,7 @@ func init() {
 
 func main() {
 	log.Info("Starting DockerRight")
+	lastBackup := ""
 
 	if !config.Conf.EnableBackup && !config.Conf.EnableMonitor {
 		log.Warn("DockerRight is disabled! Edit the config file and restart :)")
@@ -53,6 +54,7 @@ func main() {
 				log.Fatal(err)
 			}
 		}
+		lastBackup = time.Now().Format("2006-01-02T15")
 	}
 
 	if config.Conf.EnableMonitor {
@@ -60,7 +62,6 @@ func main() {
 		go monitorLoop()
 	}
 
-	lastBackup := ""
 	for config.Conf.EnableBackup {
 		curHour := time.Now().Hour()
 		curBackup := time.Now().Format("2006-01-02T15")
