@@ -68,9 +68,9 @@ If you don't want to use the ContainerRegistry, just git clone this repository a
 
 | Tag       | Description                                   |
 |-----------|-----------------------------------------------|
-| `latest`  | The latest stable version                     |
-| `0`       | The latest Major version                      |
-| `0.0`     | The latest Minor version                      |
+| `latest`  | The latest version                            |
+| `X`       | The latest Major version                      |
+| `0.X`     | The latest Minor version                      |
 | `0.0.X`   | Specific patch (see releases for versions)    |
 
 DockerRight uses Semantic Versioning, so you can lock the Image Version to a specific tag, as shown above.
@@ -116,28 +116,33 @@ Those points are roughly in order of importance (for me):
 
 - [X] Create Backups per mount
 - [X] Delete old Backups
+- [X] Make config parameters settable by environment variables
 - [ ] Add VersionTag to startup console output
-- [ ] Monitor Docker Containers
+- [ ] Backup Docker Compose Files/Run Parameters
+- [ ] BackupContainer Output to File
+- [ ] Enable concurrent backups
+- [ ] Logs to File
 - [ ] Telegram Notifications
 - [ ] Mail Notifications
 - [ ] Discord Notifications
-- [ ] Logs to File
+- [ ] Monitor Docker Containers
 - [ ] Fix Monitor only Loop
-- [ ] Enable concurrent backups
-- [ ] BackupContainer Output to File
-- [X] Make config parameters settable by environment variables
 - [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
-- [ ] Add tests
-- [ ] Backup Docker Compose Files/Run Parameters
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
+- [ ] SSH, SFTP, S3, NFS, SMB Backup location options
+- [ ] Add tests
 - [ ] WebUI for Configuration, Monitoring and Dashboard
 
 ## Patchnotes
 
 If a specific Version is not listed here, eventhough it was released, it might only be a refactor or super minor change, without changes for the user.
 As the development is rapid I might skip the patchnotes for a version!
+
+### 0.1.1
+
+- Parameter now settable via Environment Variables
 
 ### 0.0.11
 
