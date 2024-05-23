@@ -324,7 +324,8 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		return nil
 	}
 
-	containerName := "DockerRight-BackupRunner-" + container.ID
+	// WIP!
+	containerNameBase := "DockerRight-BackupRunner-" + strings.ReplaceAll(container.Names[0], "/", "")
 	now := time.Now()
 
 	backupPathBase := config.Conf.BackupPath
@@ -338,7 +339,9 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		return err
 	}
 
-	for _, m := range container.Mounts {
+	for i, m := range container.Mounts {
+		//WIP!!
+		containerName := fmt.Sprint(containerNameBase, "-m", i, "-", strings.ReplaceAll(m.Destination, "/", "_"))
 		log.Info(fmt.Sprintf("Creating container %s", containerName))
 
 		if strings.HasSuffix(m.Destination, ".sock") || strings.HasSuffix(m.Source, ".sock") {
