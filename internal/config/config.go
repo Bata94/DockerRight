@@ -53,6 +53,7 @@ func Init(configPath string) Config {
 }
 
 type Config struct {
+	Version                      string
 	EnableBackup                 bool
 	EnableMonitor                bool
 	MonitorIntervalSeconds       int
@@ -71,6 +72,7 @@ type Config struct {
 func (c *Config) SetDefaults() error {
 	log.Info("Config SetDefaults")
 
+	c.Version = "unknown"
 	c.EnableBackup = false
 	c.EnableMonitor = false
 	c.RetentionHours = 24 * 5
@@ -250,6 +252,24 @@ func (c *Config) LoadFromEnv() error {
 	return nil
 }
 
+func (c *Config) SetVersion() {
+	if os.Getenv("VERSION") != "" {
+		c.Version = os.Getenv("VERSION")
+	} else {
+		c.Version = "unknown"
+	}
+
+	log.Info("")
+	log.Info("")
+	log.Info("####-------------------------####")
+	log.Info("")
+	log.Info("    DockerRight Version: ", c.Version)
+	log.Info("")
+	log.Info("####-------------------------####")
+	log.Info("")
+	log.Info("")
+}
+
 func (c *Config) LoadFromFile() error {
 	log.Info("Config LoadFromFile")
 
@@ -267,6 +287,8 @@ func (c *Config) LoadFromFile() error {
 
 func (c *Config) Save() error {
 	log.Info("Config Saving")
+
+	Conf.SetVersion()
 
 	confFile, err := json.MarshalIndent(Conf, "", " ")
 	if err != nil {
