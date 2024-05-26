@@ -20,7 +20,7 @@ func init() {
 		log.Fatal("Error creating config directory: ", err)
 	}
 	config.Init("./config/config.json")
-	log.Init(config.Conf.LogLevel)
+	log.Init(config.Conf.LogLevel, config.Conf.LogsPath)
 	docker.Init()
 	notify.Init()
 }
@@ -35,6 +35,22 @@ func main() {
 		return
 	}
 
+	go func() {
+		log.Debug("Started LogFile Rotation GoRoutine")
+		lastDate := time.Now()
+
+		for {
+			if lastDate.Day() != time.Now().Day() {
+				log.Info("Wakey it's a new Day, new LogFile :)")
+				log.SetLoggerFile(config.Conf.LogsPath)
+				log.DeleteOldLogs(config.Conf.LogRetentionDays, config.Conf.LogsPath)
+				lastDate = time.Now()
+			}
+			time.Sleep(time.Duration(60 - time.Now().Minute()))
+		}
+	}()
+
+	// TODO: Move the functionality to the lower block
 	if config.Conf.BackupOnStartup && config.Conf.EnableBackup {
 		log.Info("Running DockerRight on startup")
 		err := docker.BackupContainers()

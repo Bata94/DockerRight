@@ -5,8 +5,11 @@ package log
 
 import (
 	"fmt"
+	"io"
+	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	logger "github.com/sirupsen/logrus"
 )
@@ -36,7 +39,7 @@ func TempInit() {
 	logger.SetLevel(logger.DebugLevel)
 }
 
-func Init(logLvlStr string) {
+func Init(logLvlStr, logPath string) {
 	logger.Info("Initializing final Logger Module")
 	var logLvl logger.Level
 
@@ -59,6 +62,53 @@ func Init(logLvlStr string) {
 
 	logger.Info("Setting log level to: ", logLvl)
 	logger.SetLevel(logLvl)
+
+	SetLoggerFile(logPath)
+}
+
+func SetLoggerFile(logPath string) {
+	if !strings.HasSuffix(logPath, "/") {
+		logPath = logPath + "/"
+	}
+	logFilePath := logPath + time.Now().Format("2006-01-02") + ".log"
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0o644)
+	if err != nil {
+		logger.Panic("Can't write to log File! Panicing....")
+	}
+	mw := io.MultiWriter(os.Stdout, logFile)
+	logger.SetOutput(mw)
+
+	Info("Logger File Output Set!")
+}
+
+func DeleteOldLogs(retentionDays int, logPath string) {
+	Debug("Deleting old Logs...")
+
+	if !strings.HasSuffix(logPath, "/") {
+		logPath = logPath + "/"
+	}
+	logFiles, err := os.ReadDir(logPath)
+	if err != nil {
+		Error("Error reading LogPath path: ", err)
+		return
+	}
+
+	for _, l := range logFiles {
+		logDate, err := time.Parse("2006-01-02", strings.Replace(l.Name(), ".log", "", 1))
+		if err != nil {
+			Error("Error Parsing LogFile Name to Date: ", err)
+			continue
+		}
+
+		if (time.Now().Day() - logDate.Day()) > retentionDays {
+			err := os.Remove(logPath + l.Name())
+			if err != nil {
+				Error("Error removeing old Log: ", l.Name(), err)
+				continue
+			}
+		}
+	}
+
 }
 
 func Debug(err ...interface{}) {
