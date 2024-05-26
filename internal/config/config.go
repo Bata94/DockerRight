@@ -60,6 +60,7 @@ type Config struct {
 	MonitorRetries               int
 	BackupHours                  []int
 	RetentionHours               int
+	LogRetentionDays             int
 	ConcurrentBackupContainer    int
 	BackupPath                   string
 	LogsPath                     string
@@ -77,6 +78,7 @@ func (c *Config) SetDefaults() error {
 	c.EnableBackup = false
 	c.EnableMonitor = false
 	c.RetentionHours = 24 * 5
+	c.LogRetentionDays = 7
 	c.MonitorIntervalSeconds = 60
 	c.MonitorRetries = 5
 	c.BackupHours = []int{}
@@ -239,6 +241,18 @@ func (c *Config) LoadFromEnv() error {
 			log.Warn("Falling back to value in 'config.json' or to default value!")
 		} else {
 			c.RetentionHours = valInt
+		}
+	}
+	if os.Getenv("LOG_RETENTION_DAYS") != "" {
+		val := os.Getenv("LOG_RETENTION_DAYS")
+		valInt, err := strconv.Atoi(val)
+
+		if err != nil {
+			log.Debug(err)
+			log.Error("Environment Variable 'LOG_RETENTION_DAYS' could not be parsed... value read: ", val)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		} else {
+			c.LogRetentionDays = valInt
 		}
 	}
 	if os.Getenv("CONCURRENT_BACKUP_CONTAINER") != "" {
