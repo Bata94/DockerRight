@@ -36,6 +36,7 @@ docker run -d
     -v /var/run/docker.sock:/var/run/docker.sock
     -v /path/to/config:/opt/DockerRight/config
     -v /path/to/backupDir:/opt/DockerRight/backup
+    # Optional: -v /path/to/logsDir:/opt/DockerRight/logs
     -e TZ=Europe/Berlin
     --name dockerright 
     ghcr.io/bata94/dockerright:latest
@@ -51,6 +52,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - /path/to/config:/opt/DockerRight/config
       - /path/to/backupDir:/opt/DockerRight/backup
+      # Optional: - /path/to/logsDir:/opt/DockerRight/logs
     environment:
       TZ: Europe/Berlin
 ```
@@ -101,9 +103,11 @@ Parameters are evaluated as follows:
 | MonitorIntervalSeconds        | MONITOR_INTERVAL_SECONDS         | 60                         | Int      | Interval in seconds                                                    |
 | MonitorReties                 | MONITOR_RETIES                   | 5                          | Int      | Retries before sending notification                                    |
 | BackupHours                   | BACKUP_HOURS                     | []                         | []Int    | Backup at these hours                                                  |
-| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Retention in hours (24 * 5)                                            |
+| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Backup Retention in hours (24 * 5)                                     |
+| LogRetentionDays              | LOG_RETENTION_DAYS               | 7                          | Int      | Log Retention in days                                                  |
 | ConcurrentBackupContainer     | CONCURRENT_BACKUP_CONTAINER      | numCPUs/2                  | Int      | How many mounts should be backed up at once                            |
 | BackupPath                    | BACKUP_PATH                      | "/opt/DockerRight/backup"  | String   | Backup Path inside container (shouldn't be changed)                    |
+| LogsPath                      | LOGS_PATH                        | "/opt/DockerRight/logs"    | String   | Logs Path inside container (shouldn't be changed)                      |
 | BeforeBackupCMD               | BEFORE_BACKUP_CMD                | ""                         | String   | CMD to execute before backup                                           |
 | AfterBackupCMD                | AFTER_BACKUP_CMD                 | ""                         | String   | CMD to execute after backup                                            |
 | LogLevel                      | LOG_LEVEL                        | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)                  |
@@ -122,16 +126,17 @@ Those points are roughly in order of importance (for me):
 - [X] Add VersionTag to startup console output
 - [X] Better DockerBackupHelperNames, that reflect ContainerName and Mount
 - [X] Enable concurrent backups
-- [ ] BackupContainer Output to File
-- [ ] Backup Docker Compose Files/Run Parameters
-- [ ] Logs to File
+- [X] BackupContainer Output to File
+- [X] Backup Docker Compose Files/Run Parameters
+- [X] Logs to File
 - [ ] Telegram Notifications
+- [X] Fix Monitor only Loop
+- [ ] Mount Container Volumes/Binds as read only, for safety
+- [ ] Monitor Docker Containers
+- [ ] Refactor!!!
+- [ ] Either configure Watchtower Container from DockerRight or program Watchtower functionality in DockerRight
 - [ ] Mail Notifications
 - [ ] Discord Notifications
-- [ ] Monitor Docker Containers
-- [X] Fix Monitor only Loop
-- [ ] Refactor!!!
-- [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
@@ -153,6 +158,9 @@ As the development is rapid I might skip the patchnotes for a version!
 - Changed BackupRunner ContainerNaming to better show what is running
 - DockerRight will now print the current VersionTag to the startup console
 - Added cuncurrent running of BackupRunners
+- ContainerInfo is now in a file, inside the backup directory
+- After-/BeforeBackupCMD Output as well as regular Logs are now written to /opt/DockerRight/logs/ (default value) directory
+- BackupErrors will be found in the BackupDir as well
 
 ### 0.0.11
 
