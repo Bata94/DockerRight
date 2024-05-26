@@ -20,6 +20,8 @@ In the best case the Output directory is mapped to a Network Drive or another Ho
 
 To see whats working now and whats planned in the near future see [TODOs](#todos).
 
+Tested and developed for Linux. Windows, WSL, MacOS might be working, but not tested/designed for!
+
 ## Limitations/Warnings
 
 Not recommended to use DockerRight as a solo backup solution for DBs or complex applications! But it's still better than no backup at all :D
@@ -146,6 +148,11 @@ As the development is rapid I might skip the patchnotes for a version!
 ### 0.1.1
 
 - Parameter now settable via Environment Variables
+- Improved Struct logging (if "\n" are display instead of linebreaks, pls check your Docker LogDriver!)
+- Disabled BackupRunner to run twice in one hour, if DockerRight is started in a defined BackupHour
+- Changed BackupRunner ContainerNaming to better show what is running
+- DockerRight will now print the current VersionTag to the startup console
+- Added cuncurrent running of BackupRunners
 
 ### 0.0.11
 
