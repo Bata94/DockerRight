@@ -94,10 +94,26 @@ func DeleteOldLogs(retentionDays int, logPath string) {
 	}
 
 	for _, l := range logFiles {
-		logDate, err := time.Parse("2006-01-02", strings.Replace(l.Name(), ".log", "", 1))
-		if err != nil {
-			Error("Error Parsing LogFile Name to Date: ", err)
-			continue
+		fileNameCleaned := strings.Replace(l.Name(), ".log", "", 1)
+
+		if fileNameCleaned[0] != '2' {
+			fileNameCleaned = strings.TrimPrefix(fileNameCleaned, fileNameCleaned[:strings.Index(fileNameCleaned, "-")+1])
+		}
+
+		var logDate time.Time
+
+		if len(fileNameCleaned) > 10 {
+			logDate, err = time.Parse("2006-01-02-05:04:05", fileNameCleaned)
+			if err != nil {
+				Error("Error Parsing LogFile Name to Date: ", err)
+				continue
+			}
+		} else {
+			logDate, err = time.Parse("2006-01-02", fileNameCleaned)
+			if err != nil {
+				Error("Error Parsing LogFile Name to Date: ", err)
+				continue
+			}
 		}
 
 		if (time.Now().Day() - logDate.Day()) > retentionDays {
