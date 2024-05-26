@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"sync"
 	"time"
 
 	"github.com/bata94/DockerRight/internal/config"
@@ -27,6 +28,7 @@ func init() {
 func main() {
 	log.Info("Starting DockerRight")
 	lastBackup := ""
+	mainWg := sync.WaitGroup{}
 
 	if !config.Conf.EnableBackup && !config.Conf.EnableMonitor {
 		log.Warn("DockerRight is disabled! Edit the config file and restart :)")
@@ -47,8 +49,11 @@ func main() {
 	}
 
 	if config.Conf.EnableMonitor {
-		// TODO: Not working if Backup is disabled
-		go monitorLoop()
+		mainWg.Add(1)
+		go func() {
+			defer mainWg.Done()
+			monitorLoop()
+		}()
 	}
 
 	for config.Conf.EnableBackup {
@@ -65,6 +70,7 @@ func main() {
 				log.Debug("Running backup at hour: ", hour)
 				err := docker.BackupContainers()
 				if err != nil {
+					// TODO: Sent Error to notify api
 					log.Error(err)
 				} else {
 					lastBackup = curBackup
@@ -84,6 +90,12 @@ func main() {
 		log.Debug("Sleeping for ", sleepDur, "...")
 		time.Sleep(sleepDur)
 	}
+
+	if !config.Conf.EnableBackup {
+		log.Warn("Backup functionality is disabled!")
+	}
+
+	mainWg.Wait()
 }
 
 func monitorLoop() {

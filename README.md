@@ -127,7 +127,7 @@ Those points are roughly in order of importance (for me):
 - [ ] Mail Notifications
 - [ ] Discord Notifications
 - [ ] Monitor Docker Containers
-- [ ] Fix Monitor only Loop
+- [X] Fix Monitor only Loop
 - [ ] Refactor!!!
 - [ ] Mount Container Volumes/Binds as read only, for safety
 - [ ] Fine grain settings via Container Labels (like traefik for example)
