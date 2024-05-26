@@ -62,6 +62,7 @@ type Config struct {
 	RetentionHours               int
 	ConcurrentBackupContainer    int
 	BackupPath                   string
+	LogsPath                     string
 	BeforeBackupCMD              string
 	AfterBackupCMD               string
 	LogLevel                     string
@@ -81,6 +82,7 @@ func (c *Config) SetDefaults() error {
 	c.BackupHours = []int{}
 	c.ConcurrentBackupContainer = (runtime.NumCPU() / 2)
 	c.BackupPath = "/opt/DockerRight/backup"
+	c.LogsPath = "/opt/DockerRight/logs"
 	c.BeforeBackupCMD = ""
 	c.AfterBackupCMD = ""
 	c.LogLevel = "info"
@@ -157,6 +159,9 @@ func (c *Config) LoadFromEnv() error {
 	// String Values
 	if os.Getenv("BACKUP_PATH") != "" {
 		c.BackupPath = os.Getenv("BACKUP_PATH")
+	}
+	if os.Getenv("LOGS_PATH") != "" {
+		c.LogsPath = os.Getenv("LOGS_PATH")
 	}
 	if os.Getenv("BEFORE_BACKUP_CMD") != "" {
 		c.BeforeBackupCMD = os.Getenv("BEFORE_BACKUP_CMD")
