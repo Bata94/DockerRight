@@ -6,6 +6,8 @@ FROM golang:1.22-bookworm as base
 ARG VERSION_BUILD
 ENV VERSION=$VERSION_BUILD
 
+RUN apt update && apt install tzdata -y
+
 WORKDIR /opt/DockerRight
 
 COPY . .
