@@ -52,7 +52,7 @@ func Init() {
 
 	if config.Conf.CreateTestContainerOnStartup {
 		log.Info("Creating test container")
-		err := RunContainer(RunContainerParams{
+		_, err := RunContainer(RunContainerParams{
 			ContainerName: "TestContainer",
 			ImageName:     defImage,
 			Cmd:           []string{"echo", "Running inside TestContainer"},
@@ -127,7 +127,7 @@ type RunContainerParams struct {
 	Mounts        []mount.Mount
 }
 
-func RunContainer(p RunContainerParams) error {
+func RunContainer(p RunContainerParams) ([]byte, error) {
 	log.Debug("Running Container")
 
 	err := PullImage(p.ImageName)
@@ -156,7 +156,7 @@ func RunContainer(p RunContainerParams) error {
 		log.Error("Error creating container: ")
 		log.Error(err)
 		_ = RemoveContainer(ctr.ID)
-		return err
+		return nil, err
 	}
 
 	err = cli.ContainerStart(ctx, ctr.ID, container.StartOptions{})
@@ -164,7 +164,7 @@ func RunContainer(p RunContainerParams) error {
 		log.Error("Error starting container: ")
 		log.Error(err)
 		_ = RemoveContainer(ctr.ID)
-		return err
+		return nil, err
 	}
 
 	statusCh, errCh := cli.ContainerWait(ctx, ctr.ID, container.WaitConditionNotRunning)
@@ -174,7 +174,7 @@ func RunContainer(p RunContainerParams) error {
 			log.Error(err)
 			log.Error(err)
 			_ = RemoveContainer(ctr.ID)
-			return err
+			return nil, err
 		}
 	case <-statusCh:
 		log.Debug("Container finished!")
@@ -192,14 +192,14 @@ func RunContainer(p RunContainerParams) error {
 	if err != nil {
 		log.Error(err)
 		_ = RemoveContainer(ctr.ID)
-		return err
+		return nil, err
 	}
 
 	logs, err := io.ReadAll(out)
 	if err != nil {
 		log.Error(err)
 		_ = RemoveContainer(ctr.ID)
-		return err
+		return nil, err
 	}
 
 	log.Debug("Container output:", "\n", string(logs))
@@ -211,7 +211,7 @@ func RunContainer(p RunContainerParams) error {
 		}
 	}
 
-	return nil
+	return logs, nil
 }
 
 func MonitorContainers() error {
@@ -240,9 +240,9 @@ func GetHostBackupPath(containers []types.Container) string {
 	return hostBackupPath
 }
 
-func RunOSCmd(cmd string) ([]byte, error) {
+func RunOSCmd(cmdType, cmd string) ([]byte, error) {
 	if cmd != "" {
-		runCmd := exec.Command("sh", "-c", config.Conf.BeforeBackupCMD)
+		runCmd := exec.Command("sh", "-c", cmd)
 
 		output, err := runCmd.Output()
 		if err != nil {
@@ -250,6 +250,16 @@ func RunOSCmd(cmd string) ([]byte, error) {
 			log.Error(err)
 			return nil, err
 		}
+
+		logPath := config.Conf.LogsPath
+		if !strings.HasSuffix(logPath, "/") {
+			logPath = logPath + "/"
+		}
+		err = os.WriteFile(logPath+cmdType+"-"+time.Now().Format("2006-01-02-15:04:05")+".log", output, 0644)
+		if err != nil {
+			log.Error("Error writing log: ", err)
+		}
+
 		return output, nil
 	} else {
 		return nil, nil
@@ -274,7 +284,7 @@ func BackupContainers() error {
 	}
 
 	log.Info("Running BeforeBackupCMD", "\n", config.Conf.BeforeBackupCMD)
-	output, err := RunOSCmd(config.Conf.BeforeBackupCMD)
+	output, err := RunOSCmd("BeforeBackupCMD", config.Conf.BeforeBackupCMD)
 	if err != nil {
 		log.Error("Error running BeforeBackupCMD: ", err)
 	} else {
@@ -301,9 +311,9 @@ func BackupContainers() error {
 			time.Sleep(time.Duration(time.Millisecond * 250))
 		}
 		go func(ctr types.Container) {
+			defer wg.Done()
 			backupErr := RunBackupHelperForContainer(ctr, hostBackupPath)
 
-			defer wg.Done()
 			if backupErr != nil {
 				log.Error("Error in concurrent backup runner ", ctr.Names[0], " Error: ", backupErr)
 			}
@@ -312,7 +322,7 @@ func BackupContainers() error {
 	wg.Wait()
 
 	log.Info("Running AfterBackupCMD", "\n", config.Conf.AfterBackupCMD)
-	output, err = RunOSCmd(config.Conf.AfterBackupCMD)
+	output, err = RunOSCmd("AfterBackupCMD", config.Conf.AfterBackupCMD)
 	if err != nil {
 		log.Error("Error running AfterBackupCMD: ", err)
 	} else {
@@ -337,7 +347,6 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		return nil
 	}
 
-	// WIP!
 	containerNameBase := "DockerRight-BackupRunner-" + strings.ReplaceAll(container.Names[0], "/", "")
 	now := time.Now()
 
@@ -345,17 +354,23 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 	if !strings.HasSuffix(backupPathBase, "/") {
 		backupPathBase = backupPathBase + "/"
 	}
-	backupPath := backupPathBase + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05")
-	err := os.MkdirAll(backupPath, 0o755)
+	backupPath := strings.ReplaceAll(container.Names[0], "/", "") + "/" + now.Format("2006-01-02-15-04-05") + "/"
+	err := os.MkdirAll(backupPathBase+"/"+backupPath, 0o755)
 	if err != nil {
 		log.Error(err)
 		return err
+	}
+
+	err = os.WriteFile(backupPathBase+"/"+backupPath+"/ContainerInfo.txt", []byte(log.FormatStruct(container)), 0o644)
+	if err != nil {
+		log.Error("Unable to save ContainerInfoFile for container ", container.Names[0], " Error: ", err)
 	}
 
 	for i, m := range container.Mounts {
 		containerName := fmt.Sprint(containerNameBase, "-m", i, "-", strings.ReplaceAll(m.Destination, "/", "_"))
 		log.Info(fmt.Sprintf("Creating container %s", containerName))
 
+		// TODO: Move those to a Parameter
 		if strings.HasSuffix(m.Destination, ".sock") || strings.HasSuffix(m.Source, ".sock") {
 			log.Warn(fmt.Sprintf("Skipping mount %s : %s for Container %s because it contains a socket!", m.Source, m.Destination, containerName))
 			continue
@@ -368,9 +383,11 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		}
 
 		mountInfoFileName := fmt.Sprint(m.Type) + strings.Replace(m.Destination, "/", "_", -1)
-		cmd := []string{"tar", "cvf", "/opt/backup" + "/" + container.Names[0] + "/" + now.Format("2006-01-02-15-04-05") + "/" + mountInfoFileName + ".tar", m.Destination}
+		// backupPathBase := strings.ReplaceAll(container.Names[0], "/", "") + "/" + now.Format("2006-01-02-15-04-05") + "/" + mountInfoFileName
+
+		cmd := []string{"tar", "cvf", backupPathBase + "/" + backupPath + mountInfoFileName + ".tar", m.Destination}
 		log.Debug(cmd)
-		err := RunContainer(RunContainerParams{
+		out, err := RunContainer(RunContainerParams{
 			ContainerName: containerName,
 			ImageName:     defImage,
 			Cmd:           cmd,
@@ -380,12 +397,17 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 				{
 					Type:   mount.TypeBind,
 					Source: hostBackupPath,
-					Target: "/opt/backup",
+					Target: backupPathBase,
 				},
 			},
 		})
 		if err != nil {
 			return err
+		}
+
+		err = os.WriteFile(backupPathBase+"/"+backupPath+mountInfoFileName+".log", out, 0o644)
+		if err != nil {
+			log.Error("Unable to save backup logfile for container ", containerName, " Error: ", err)
 		}
 	}
 	time.Sleep(time.Second * 5)
