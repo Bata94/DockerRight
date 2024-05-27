@@ -189,7 +189,6 @@ func (c *Config) LoadFromEnv() error {
 
 		for _, s := range backupHoursStrList {
 			hourInt, err := strconv.Atoi(s)
-
 			if err != nil {
 				log.Debug(err, s)
 

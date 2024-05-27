@@ -124,7 +124,6 @@ func DeleteOldLogs(retentionDays int, logPath string) {
 			}
 		}
 	}
-
 }
 
 func Debug(err ...interface{}) {

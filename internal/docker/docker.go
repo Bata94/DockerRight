@@ -255,7 +255,7 @@ func RunOSCmd(cmdType, cmd string) ([]byte, error) {
 		if !strings.HasSuffix(logPath, "/") {
 			logPath = logPath + "/"
 		}
-		err = os.WriteFile(logPath+cmdType+"-"+time.Now().Format("2006-01-02-15:04:05")+".log", output, 0644)
+		err = os.WriteFile(logPath+cmdType+"-"+time.Now().Format("2006-01-02-15:04:05")+".log", output, 0o644)
 		if err != nil {
 			log.Error("Error writing log: ", err)
 		}

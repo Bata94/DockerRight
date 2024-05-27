@@ -7,11 +7,12 @@ services:
     #   dockerfile: Dockerfile
     #   target: prod
     # image: ghcr.io/bata94/dockerright:latest
-    image: dr_test
+    image: dockerright
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./backup:/opt/DockerRight/backup
       - ./config:/opt/DockerRight/config
+      - ./logs:/opt/DockerRight/logs
     environment:
       TZ: Europe/Berlin
 
@@ -29,8 +30,8 @@ services:
     environment:
       TZ: Europe/Berlin
       LOG_LEVEL: "info"
-      ENABLE_BACKUP: true
-      ENABLE_MONITOR: false
+      ENABLE_BACKUP: true 
+      ENABLE_MONITOR: true
       BACKUP_ON_STARTUP: true
       CREATE_TEST_CONTAINER_ON_STARTUP: true
       BEFORE_BACKUP_CMD: "uname -a"
