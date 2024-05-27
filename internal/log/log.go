@@ -63,6 +63,11 @@ func Init(logLvlStr, logPath string) {
 	logger.Info("Setting log level to: ", logLvl)
 	logger.SetLevel(logLvl)
 
+	err := os.MkdirAll(logPath, 0o755)
+	if err != nil {
+		logger.Panic("Error creating LogPath: ", err)
+	}
+
 	SetLoggerFile(logPath)
 }
 
