@@ -11,8 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bata94/DockerRight/internal/notify"
 	logger "github.com/sirupsen/logrus"
 )
+
+var loggerLvl int
 
 func FormatStruct(v interface{}) string {
 	val := reflect.ValueOf(v)
@@ -36,6 +39,7 @@ func FormatStruct(v interface{}) string {
 
 func TempInit() {
 	logger.Info("Initializing temp Logger Module")
+	loggerLvl = 3 // logger.WarnLevel
 	logger.SetLevel(logger.DebugLevel)
 }
 
@@ -45,18 +49,25 @@ func Init(logLvlStr, logPath string) {
 
 	switch strings.ToLower(logLvlStr) {
 	case "debug":
+		loggerLvl = 5
 		logLvl = logger.DebugLevel
 	case "info":
+		loggerLvl = 4
 		logLvl = logger.InfoLevel
 	case "warn":
+		loggerLvl = 3
 		logLvl = logger.WarnLevel
 	case "error":
+		loggerLvl = 2
 		logLvl = logger.ErrorLevel
 	case "fatal":
+		loggerLvl = 1
 		logLvl = logger.FatalLevel
 	case "panic":
+		loggerLvl = 1
 		logLvl = logger.PanicLevel
 	default:
+		loggerLvl = 4
 		logLvl = logger.InfoLevel
 	}
 
@@ -132,25 +143,36 @@ func DeleteOldLogs(retentionDays int, logPath string) {
 }
 
 func Debug(err ...interface{}) {
+	notify.Notifier(5, err)
 	logger.Debug(err...)
 }
 
 func Info(err ...interface{}) {
+	notify.Notifier(4, err)
 	logger.Info(err...)
 }
 
 func Warn(err ...interface{}) {
+	notify.Notifier(3, err)
+	logger.Warn(err...)
+}
+
+func MonitorMsg(err ...interface{}) {
+	notify.Notifier(0, err)
 	logger.Warn(err...)
 }
 
 func Error(err ...interface{}) {
+	notify.Notifier(2, err)
 	logger.Error(err...)
 }
 
 func Fatal(err ...interface{}) {
+	notify.Notifier(1, err)
 	logger.Fatal(err...)
 }
 
 func Panic(err ...interface{}) {
+	notify.Notifier(1, err)
 	logger.Panic(err...)
 }

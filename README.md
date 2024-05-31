@@ -96,6 +96,8 @@ Parameters are evaluated as follows:
     2. config.json
     3. default values
 
+If you change a Parameter you will need to restart the DockerRightContainer to apply the change.
+
 | Parameter (config.json)       | Parameter (EnvVar)               | Default                    | Type     | Description                                                            |
 |-------------------------------|----------------------------------|----------------------------|----------|------------------------------------------------------------------------|
 | EnableBackup                  | ENABLE_BACKUP                    | false                      | Bool     | Enable backup service                                                  |
@@ -103,7 +105,7 @@ Parameters are evaluated as follows:
 | MonitorIntervalSeconds        | MONITOR_INTERVAL_SECONDS         | 60                         | Int      | Interval in seconds                                                    |
 | MonitorReties                 | MONITOR_RETIES                   | 5                          | Int      | Retries before sending notification                                    |
 | BackupHours                   | BACKUP_HOURS                     | []                         | []Int    | Backup at these hours                                                  |
-| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Backup Retention in hours (24 * 5)                                     |
+| RetentionHours                | RETENTION_HOURS                  | 120                        | Int      | Backup Retention in hours (24h * 5d)                                   |
 | LogRetentionDays              | LOG_RETENTION_DAYS               | 7                          | Int      | Log Retention in days                                                  |
 | ConcurrentBackupContainer     | CONCURRENT_BACKUP_CONTAINER      | numCPUs/2                  | Int      | How many mounts should be backed up at once                            |
 | BackupPath                    | BACKUP_PATH                      | "/opt/DockerRight/backup"  | String   | Backup Path inside container (shouldn't be changed)                    |
@@ -111,8 +113,29 @@ Parameters are evaluated as follows:
 | BeforeBackupCMD               | BEFORE_BACKUP_CMD                | ""                         | String   | CMD to execute before backup                                           |
 | AfterBackupCMD                | AFTER_BACKUP_CMD                 | ""                         | String   | CMD to execute after backup                                            |
 | LogLevel                      | LOG_LEVEL                        | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)                  |
+| NotifyLevel                   | NOTIFY_LEVEL                     | "error"                    | String   | Set NotificationLevel (debug, info, warn, error, fatal, panic)         |
 | BackupOnStartup               | BACKUP_ON_STARTUP                | false                      | Bool     | Start a Backup on startup, won't run again if started in a BackupHour  |
 | CreateTestContainerOnStartup  | CREATE_TEST_CONTAINER_ON_STARTUP | true                       | Bool     | Create a TestContainer on startup, to check docker.sock                |
+| NotifyLevel                   | NOTIFY_LEVEL                     | "warn"                     | String   | Set NotificationLevel (debug, info, warn, error, fatal, panic, none)   |
+| TelegramBotToken              | TELEGRAM_BOT_TOKEN               | ""                         | String   | Telegram Bot Token [TelegramConf](#notifytelegram)                     |
+| TelegramChatIDs               | TELEGRAM_CHAT_IDS                | []                         | []Int    | Telegram Chat IDs [TelegramConf](#notifytelegram)                      |
+
+#### Notifications
+
+If you want to get Notifications you will need to set the desired NotifyLevel, so all Logs in that Level (and above) will be send to the configured NotifyClients (i.e Telegram).
+
+Container Monitoring will always be sent to all available clients.
+
+##### NotifyTelegram
+
+To enable Telegram notifications you will need to setup a BotToken and at least one ChatID.
+
+To get a BotToken got to [BotFather](https://t.me/BotFather), create a new Bot and start it. It is necessary to create a new Bot for every DockerRightInstance!
+
+The ChatID is more or less your ID, to get it you have two options:
+
+    1. DockerRight is not running -> send a message to your created Bot and than visit >>https://api.telegram.org/bot<HIER_DEIN_BOT_TOKEN>/getUpdates<<
+    2. DockerRight is running -> send a message to your created Bot and than watch the DockerRight logs. Under the WARN Flag there should pop up a LogMessage with your ID
 
 ## TODOs
 
@@ -129,18 +152,20 @@ Those points are roughly in order of importance (for me):
 - [X] BackupContainer Output to File
 - [X] Backup Docker Compose Files/Run Parameters
 - [X] Logs to File
-- [ ] Telegram Notifications
+- [ ] Monitor Docker Containers
+- [X] Telegram Notifications
 - [X] Fix Monitor only Loop
 - [ ] Mount Container Volumes/Binds as read only, for safety
-- [ ] Monitor Docker Containers
+- [ ] Deleting EnvVars do not overwrite config.json... (not shure how to fix it right now...)
+- [ ] config.json FilePermissions
 - [ ] Refactor!!!
-- [ ] Either configure Watchtower Container from DockerRight or program Watchtower functionality in DockerRight
 - [ ] Mail Notifications
 - [ ] Discord Notifications
 - [ ] Fine grain settings via Container Labels (like traefik for example)
 - [ ] Restore Backups
 - [ ] Image specific backup CMDs (i.e. for DBs, Nextcloud, Zammad, Mailcow etc.)
 - [ ] SSH, SFTP, S3, NFS, SMB Backup location options
+- [ ] Either configure Watchtower Container from DockerRight or program Watchtower functionality into DockerRight
 - [ ] Refactor!!!
 - [ ] WebUI for Configuration, Monitoring and Dashboard
 - [ ] Add tests :D
@@ -149,6 +174,11 @@ Those points are roughly in order of importance (for me):
 
 If a specific Version is not listed here, eventhough it was released, it might only be a refactor or super minor change, without changes for the user.
 As the development is rapid I might skip the patchnotes for a version!
+
+### 0.2.1
+
+- Telegram Notifications implemented
+- DockerContainer Monitor implemented
 
 ### 0.1.1
 

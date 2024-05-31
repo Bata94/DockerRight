@@ -22,7 +22,7 @@ func init() {
 	config.Init("./config/config.json")
 	log.Init(config.Conf.LogLevel, config.Conf.LogsPath)
 	docker.Init()
-	notify.Init()
+	notify.Init(config.Conf.NotifyLevel, config.Conf.TelegramBotToken, config.Conf.TelegramChatIDs)
 }
 
 func main() {

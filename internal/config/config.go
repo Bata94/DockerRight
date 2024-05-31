@@ -69,6 +69,9 @@ type Config struct {
 	LogLevel                     string
 	BackupOnStartup              bool
 	CreateTestContainerOnStartup bool
+	NotifyLevel                  string
+	TelegramChatIDs              []int
+	TelegramBotToken             string
 }
 
 func (c *Config) SetDefaults() error {
@@ -90,6 +93,9 @@ func (c *Config) SetDefaults() error {
 	c.LogLevel = "info"
 	c.BackupOnStartup = false
 	c.CreateTestContainerOnStartup = true
+	c.NotifyLevel = "warn"
+	c.TelegramBotToken = ""
+	c.TelegramChatIDs = []int{}
 
 	return nil
 }
@@ -174,6 +180,12 @@ func (c *Config) LoadFromEnv() error {
 	if os.Getenv("LOG_LEVEL") != "" {
 		c.LogLevel = os.Getenv("LOG_LEVEL")
 	}
+	if os.Getenv("NOTIFY_LEVEL") != "" {
+		c.LogLevel = os.Getenv("NOTIFY_LEVEL")
+	}
+	if os.Getenv("TELEGRAM_BOT_TOKEN") != "" {
+		c.TelegramBotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
+	}
 
 	// List Values
 	if os.Getenv("BACKUP_HOURS") != "" {
@@ -202,6 +214,34 @@ func (c *Config) LoadFromEnv() error {
 
 		if len(backupHours) != 0 {
 			c.BackupHours = backupHours
+		}
+	}
+	if os.Getenv("TELEGRAM_CHAT_IDS") != "" {
+		tgChatIDsVar := os.Getenv("TELEGRAM_CHAT_IDS")
+		tgChatIDs := []int{}
+
+		// String cleanup
+		tgChatIDsVar = strings.ReplaceAll(tgChatIDsVar, "[", "")
+		tgChatIDsVar = strings.ReplaceAll(tgChatIDsVar, "]", "")
+		tgChatIDsVar = strings.ReplaceAll(tgChatIDsVar, " ", "")
+
+		tgChatIDsStrList := strings.Split(tgChatIDsVar, ",")
+
+		for _, s := range tgChatIDsStrList {
+			hourInt, err := strconv.Atoi(s)
+			if err != nil {
+				log.Debug(err, s)
+
+				log.Error("Environment Variable 'TELEGRAM_CHAT_IDS' could not be parsed... value read: ", tgChatIDsVar)
+				log.Warn("Falling back to value in 'config.json' or to default value!")
+				break
+			}
+
+			tgChatIDs = append(tgChatIDs, hourInt)
+		}
+
+		if len(tgChatIDs) != 0 {
+			c.TelegramChatIDs = tgChatIDs
 		}
 	}
 
