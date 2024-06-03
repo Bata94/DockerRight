@@ -355,7 +355,7 @@ func RunBackupHelperForContainer(container types.Container, hostBackupPath strin
 		backupPathBase = backupPathBase + "/"
 	}
 	backupPath := strings.ReplaceAll(container.Names[0], "/", "") + "/" + now.Format("2006-01-02-15-04-05") + "/"
-	err := os.MkdirAll(backupPathBase+"/"+backupPath, 0o755)
+	err := os.MkdirAll(backupPathBase+"/"+backupPath, 0o644)
 	if err != nil {
 		log.Error(err)
 		return err

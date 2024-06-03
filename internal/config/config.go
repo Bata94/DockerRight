@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"os/user"
 	"runtime"
 	"strconv"
 	"strings"
@@ -194,7 +195,7 @@ func (c *Config) LoadFromEnv() error {
 		c.LogLevel = os.Getenv("LOG_LEVEL")
 	}
 	if os.Getenv("NOTIFY_LEVEL") != "" {
-		c.LogLevel = os.Getenv("NOTIFY_LEVEL")
+		c.NotifyLevel = os.Getenv("NOTIFY_LEVEL")
 	}
 	if os.Getenv("TELEGRAM_BOT_TOKEN") != "" {
 		c.TelegramBotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
@@ -368,6 +369,19 @@ func (c *Config) Save() error {
 	err = os.WriteFile(ConfigPath, confFile, 0o644)
 	if err != nil {
 		return errors.New("Error writing config file: " + err.Error())
+	}
+	dockerGid, err := user.LookupGroup("docker")
+	if err != nil {
+		return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
+	}
+	log.Debug("Docker GID: ", log.FormatStruct(dockerGid))
+	gid, err := strconv.Atoi(dockerGid.Gid)
+	if err != nil {
+		return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
+	}
+	err = os.Chown(ConfigPath, -1, gid)
+	if err != nil {
+		return errors.New("Error changing ownership of config file: " + err.Error())
 	}
 
 	return nil

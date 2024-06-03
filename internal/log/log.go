@@ -71,10 +71,10 @@ func Init(logLvlStr, logPath string, log2File bool) {
 		logLvl = logger.InfoLevel
 	}
 
-	logger.Info("Setting log level to: ", logLvl)
+	logger.Info("Setting log level to: ", logLvl, loggerLvl)
 	logger.SetLevel(logLvl)
 
-	err := os.MkdirAll(logPath, 0o755)
+	err := os.MkdirAll(logPath, 0o644)
 	if err != nil {
 		logger.Panic("Error creating LogPath: ", err)
 	}
@@ -163,7 +163,7 @@ func Warn(err ...interface{}) {
 }
 
 func MonitorMsg(err ...interface{}) {
-	notify.Notifier(0, err)
+	notify.Notifier(-1, err)
 	logger.Warn(err...)
 }
 

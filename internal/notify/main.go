@@ -29,11 +29,12 @@ func Init(notifyLevelStr, telegramBotToken string, telegramChatIDs []int) {
 	case "panic":
 		notifyLevel = 1
 	case "none":
-		notifyLevel = 0
+		notifyLevel = -1
 	default:
 		notifyLevel = 4
 	}
 
+	log.Info("NotifyLevel set to ", notifyLevel)
 	enableTelegram = false
 
 	if telegramBotToken != "" {
@@ -50,9 +51,16 @@ func Init(notifyLevelStr, telegramBotToken string, telegramChatIDs []int) {
 }
 
 func Notifier(logLevel int, err ...interface{}) {
-	log.Debug("Notifier notifyLvl ", notifyLevel, " Msg LogLevel ", logLevel)
+	// TODO: Add FormatWrapper
 	notifyMsg := fmt.Sprintf("%s", err)
-	if notifyLevel >= logLevel {
+	if notifyMsg[:2] == "[[" {
+		notifyMsg = notifyMsg[2:]
+	}
+	if notifyMsg[len(notifyMsg)-2:] == "]]" {
+		notifyMsg = notifyMsg[0 : len(notifyMsg)-2]
+	}
+
+	if notifyLevel != 0 && notifyLevel >= logLevel {
 		if enableTelegram {
 			NotifierTelegram(notifyMsg)
 		}

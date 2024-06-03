@@ -15,7 +15,7 @@ func init() {
 	log.Info("Initializing DockerRight")
 	log.TempInit()
 
-	err := os.MkdirAll("./config", 0o755)
+	err := os.MkdirAll("./config", 0o644)
 	if err != nil {
 		log.Fatal("Error creating config directory: ", err)
 	}
@@ -35,20 +35,22 @@ func main() {
 		return
 	}
 
-	go func() {
-		log.Debug("Started LogFile Rotation GoRoutine")
-		lastDate := time.Now()
+	if config.Conf.Log2File {
+		go func() {
+			log.Debug("Started LogFile Rotation GoRoutine")
+			lastDate := time.Now()
 
-		for {
-			if lastDate.Day() != time.Now().Day() {
-				log.Info("Wakey it's a new Day, new LogFile :)")
-				log.SetLoggerFile(config.Conf.LogsPath)
-				log.DeleteOldLogs(config.Conf.LogRetentionDays, config.Conf.LogsPath)
-				lastDate = time.Now()
+			for {
+				if lastDate.Day() != time.Now().Day() {
+					log.Info("Wakey it's a new Day, new LogFile :)")
+					log.SetLoggerFile(config.Conf.LogsPath)
+					log.DeleteOldLogs(config.Conf.LogRetentionDays, config.Conf.LogsPath)
+					lastDate = time.Now()
+				}
+				time.Sleep(time.Duration(60 - time.Now().Minute()))
 			}
-			time.Sleep(time.Duration(60 - time.Now().Minute()))
-		}
-	}()
+		}()
+	}
 
 	// TODO: Move the functionality to the lower block
 	if config.Conf.BackupOnStartup && config.Conf.EnableBackup {
@@ -86,7 +88,6 @@ func main() {
 				log.Debug("Running backup at hour: ", hour)
 				err := docker.BackupContainers()
 				if err != nil {
-					// TODO: Sent Error to notify api
 					log.Error(err)
 				} else {
 					lastBackup = curBackup
@@ -119,8 +120,7 @@ func monitorLoop() {
 	for {
 		err := docker.MonitorContainers()
 		if err != nil {
-			log.Error(err)
-			// TODO: Handle error, notify user of crash
+			log.MonitorMsg(err)
 		}
 		log.Info("Sleeping for ", sleepDur, "...")
 		time.Sleep(sleepDur)
