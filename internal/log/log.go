@@ -43,7 +43,7 @@ func TempInit() {
 	logger.SetLevel(logger.DebugLevel)
 }
 
-func Init(logLvlStr, logPath string) {
+func Init(logLvlStr, logPath string, log2File bool) {
 	logger.Info("Initializing final Logger Module")
 	var logLvl logger.Level
 
@@ -79,7 +79,12 @@ func Init(logLvlStr, logPath string) {
 		logger.Panic("Error creating LogPath: ", err)
 	}
 
-	SetLoggerFile(logPath)
+	if log2File {
+		SetLoggerFile(logPath)
+		Info("Logging to STDOUT and File")
+	} else {
+		Info("Logging to STDOUT")
+	}
 }
 
 func SetLoggerFile(logPath string) {

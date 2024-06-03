@@ -112,6 +112,7 @@ If you change a Parameter you will need to restart the DockerRightContainer to a
 | LogsPath                      | LOGS_PATH                        | "/opt/DockerRight/logs"    | String   | Logs Path inside container (shouldn't be changed)                      |
 | BeforeBackupCMD               | BEFORE_BACKUP_CMD                | ""                         | String   | CMD to execute before backup                                           |
 | AfterBackupCMD                | AFTER_BACKUP_CMD                 | ""                         | String   | CMD to execute after backup                                            |
+| Log2File                      | LOG2FILE                         | false                      | Bool     | Toggle Log to File                                                     |
 | LogLevel                      | LOG_LEVEL                        | "info"                     | String   | Set LogLevel (debug, info, warn, error, fatal, panic)                  |
 | NotifyLevel                   | NOTIFY_LEVEL                     | "error"                    | String   | Set NotificationLevel (debug, info, warn, error, fatal, panic)         |
 | BackupOnStartup               | BACKUP_ON_STARTUP                | false                      | Bool     | Start a Backup on startup, won't run again if started in a BackupHour  |
@@ -152,12 +153,15 @@ Those points are roughly in order of importance (for me):
 - [X] BackupContainer Output to File
 - [X] Backup Docker Compose Files/Run Parameters
 - [X] Logs to File
-- [ ] Monitor Docker Containers
+- [X] Monitor Docker Containers
 - [X] Telegram Notifications
 - [X] Fix Monitor only Loop
 - [ ] Mount Container Volumes/Binds as read only, for safety
-- [ ] Deleting EnvVars do not overwrite config.json... (not shure how to fix it right now...)
+- [ ] Find reason for high CPU usage on low end CPUs (Zimaboard 40% in "idle"...)
+- [X] Add Parameter to enable/disable log to File
+- [ ] Deleting EnvVars do not overwrite config.json... (not sure how to fix it right now...)
 - [ ] config.json FilePermissions
+- [ ] Add FormatWrapper for Notify Package
 - [ ] Refactor!!!
 - [ ] Mail Notifications
 - [ ] Discord Notifications
@@ -179,6 +183,7 @@ As the development is rapid I might skip the patchnotes for a version!
 
 - Telegram Notifications implemented
 - DockerContainer Monitor implemented
+- Added Parameter to toggle File logging
 
 ### 0.1.1
 

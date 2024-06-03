@@ -20,7 +20,7 @@ func init() {
 		log.Fatal("Error creating config directory: ", err)
 	}
 	config.Init("./config/config.json")
-	log.Init(config.Conf.LogLevel, config.Conf.LogsPath)
+	log.Init(config.Conf.LogLevel, config.Conf.LogsPath, config.Conf.Log2File)
 	docker.Init()
 	notify.Init(config.Conf.NotifyLevel, config.Conf.TelegramBotToken, config.Conf.TelegramChatIDs)
 }

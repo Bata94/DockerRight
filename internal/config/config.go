@@ -67,6 +67,7 @@ type Config struct {
 	BeforeBackupCMD              string
 	AfterBackupCMD               string
 	LogLevel                     string
+	Log2File                     bool
 	BackupOnStartup              bool
 	CreateTestContainerOnStartup bool
 	NotifyLevel                  string
@@ -88,6 +89,7 @@ func (c *Config) SetDefaults() error {
 	c.ConcurrentBackupContainer = (runtime.NumCPU() / 2)
 	c.BackupPath = "/opt/DockerRight/backup"
 	c.LogsPath = "/opt/DockerRight/logs"
+	c.Log2File = false
 	c.BeforeBackupCMD = ""
 	c.AfterBackupCMD = ""
 	c.LogLevel = "info"
@@ -160,6 +162,17 @@ func (c *Config) LoadFromEnv() error {
 			c.BackupOnStartup = false
 		} else {
 			log.Error("Environment Variable 'CREATE_TEST_CONTAINER_ON_STARTUP' could not be parsed... value read: ", createTestContainerOnStartup)
+			log.Warn("Falling back to value in 'config.json' or to default value!")
+		}
+	}
+	if os.Getenv("LOG2FILE") != "" {
+		log2File := strings.ToLower(os.Getenv("LOG2FILE"))
+		if log2File == "true" {
+			c.Log2File = true
+		} else if log2File == "false" {
+			c.Log2File = false
+		} else {
+			log.Error("Environment Variable 'LOG2FILE' could not be parsed... value read: ", log2File)
 			log.Warn("Falling back to value in 'config.json' or to default value!")
 		}
 	}
