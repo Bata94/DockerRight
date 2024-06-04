@@ -1,8 +1,8 @@
 GOCMD=go
 BINARY_NAME=dockerright
 MAJOR_VERSION?=0
-MINOR_VERSION?=1
-PATCH_VERSION?=2
+MINOR_VERSION?=2
+PATCH_VERSION?=1
 VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(PATCH_VERSION)
 DOCKER_REGISTRY?=ghcr.io/bata94/
 EXPORT_RESULT?=false # for CI please set EXPORT_RESULT to true
@@ -21,7 +21,7 @@ build:
 	docker build --target prod --build-arg VERSION_BUILD=$(VERSION) --tag $(BINARY_NAME) .
 
 release-git:
-	git add .
+	git add ./Makefile
 	git commit -m "Release version $(VERSION)"
 	git tag -a $(VERSION) -m "Release version $(VERSION)"
 	git push
