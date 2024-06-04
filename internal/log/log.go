@@ -17,6 +17,16 @@ import (
 
 var loggerLvl int
 
+func FormatListOfStructs(vL ...interface{}) string {
+	retStr := "[\n"
+	for _, v := range vL {
+		retStr += FormatStruct(v) + ",\n"
+	}
+	retStr += "]"
+
+	return retStr
+}
+
 func FormatStruct(v interface{}) string {
 	val := reflect.ValueOf(v)
 	typ := val.Type()

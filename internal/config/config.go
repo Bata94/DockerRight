@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"os/user"
+	// "os/user"
 	"runtime"
 	"strconv"
 	"strings"
@@ -370,19 +370,19 @@ func (c *Config) Save() error {
 	if err != nil {
 		return errors.New("Error writing config file: " + err.Error())
 	}
-	dockerGid, err := user.LookupGroup("docker")
-	if err != nil {
-		return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
-	}
-	log.Debug("Docker GID: ", log.FormatStruct(dockerGid))
-	gid, err := strconv.Atoi(dockerGid.Gid)
-	if err != nil {
-		return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
-	}
-	err = os.Chown(ConfigPath, -1, gid)
-	if err != nil {
-		return errors.New("Error changing ownership of config file: " + err.Error())
-	}
+	// dockerGid, err := user.LookupGroup("docker")
+	// if err != nil {
+	// 	return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
+	// }
+	// log.Debug("Docker GID: ", log.FormatStruct(dockerGid))
+	// gid, err := strconv.Atoi(dockerGid.Gid)
+	// if err != nil {
+	// 	return errors.New("Error getting GID of Docker UserGroup: " + err.Error())
+	// }
+	// err = os.Chown(ConfigPath, -1, gid)
+	// if err != nil {
+	// 	return errors.New("Error changing ownership of config file: " + err.Error())
+	// }
 
 	return nil
 }

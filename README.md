@@ -157,9 +157,10 @@ Those points are roughly in order of importance (for me):
 - [X] Telegram Notifications
 - [X] Fix Monitor only Loop
 - [ ] Mount Container Volumes/Binds as read only, for safety
-- [ ] Find reason for high CPU usage on low end CPUs (Zimaboard 40% in "idle"...)
+- [X] Change from time.sleep() to time.Ticker() or Crons
+- [ ] Find reason for high CPU usage on low end CPUs (Zimaboard 40% in "idle"...) might be time.sleep
 - [X] Add Parameter to enable/disable log to File
-- [ ] Deleting EnvVars do not overwrite config.json... (not sure how to fix it right now...)
+- [ ] Deleting EnvVars do not overwrite config.json... (not sure how to fix/handle it right now...)
 - [ ] config.json FilePermissions
 - [ ] Add FormatWrapper for Notify Package
 - [ ] Refactor!!!

@@ -214,8 +214,42 @@ func RunContainer(p RunContainerParams) ([]byte, error) {
 	return logs, nil
 }
 
-func MonitorContainers() error {
+type ContainerInfo struct {
+	ID           string
+	Name         string
+	States       []string
+	MonitorState string
+}
+
+func MonitorContainers(contInfos *[]ContainerInfo) error {
 	log.Info("MonitorContainers")
+
+	c, err := cli.ContainerList(ctx, container.ListOptions{
+		All: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, container := range c {
+		inList := false
+		contState := container.State
+		if strings.Contains(container.Status, "unhealthy") {
+			contState = "unhealthy"
+		}
+
+		for i, ci := range *contInfos {
+			if container.ID == ci.ID {
+				inList = true
+				(*contInfos)[i].States = append(ci.States, contState)
+				break
+			}
+		}
+
+		if !inList {
+			*contInfos = append(*contInfos, ContainerInfo{ID: container.ID, Name: container.Names[0][1:], States: []string{contState}})
+		}
+	}
 
 	return nil
 }

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"os"
-	"sync"
 	"time"
+
+	"github.com/robfig/cron/v3"
 
 	"github.com/bata94/DockerRight/internal/config"
 	"github.com/bata94/DockerRight/internal/docker"
@@ -27,102 +29,125 @@ func init() {
 
 func main() {
 	log.Info("Starting DockerRight")
-	lastBackup := ""
-	mainWg := sync.WaitGroup{}
 
 	if !config.Conf.EnableBackup && !config.Conf.EnableMonitor {
 		log.Warn("DockerRight is disabled! Edit the config file and restart :)")
 		return
+	} else if !config.Conf.EnableBackup {
+		log.Warn("Backup functionality is disabled!")
+	} else if !config.Conf.EnableMonitor {
+		log.Warn("Monitor functionality is disabled!")
 	}
+
+	c := cron.New()
+
+	log.Info("Timezone: ", c.Location().String())
 
 	if config.Conf.Log2File {
-		go func() {
-			log.Debug("Started LogFile Rotation GoRoutine")
-			lastDate := time.Now()
-
-			for {
-				if lastDate.Day() != time.Now().Day() {
-					log.Info("Wakey it's a new Day, new LogFile :)")
-					log.SetLoggerFile(config.Conf.LogsPath)
-					log.DeleteOldLogs(config.Conf.LogRetentionDays, config.Conf.LogsPath)
-					lastDate = time.Now()
-				}
-				time.Sleep(time.Duration(60 - time.Now().Minute()))
-			}
-		}()
-	}
-
-	// TODO: Move the functionality to the lower block
-	if config.Conf.BackupOnStartup && config.Conf.EnableBackup {
-		log.Info("Running DockerRight on startup")
-		err := docker.BackupContainers()
+		log.Debug("Started LogFile Rotation GoRoutine")
+		_, err := c.AddFunc("@midnight", func() {
+			log.Info("Wakey it's a new Day -> new LogFile :)")
+			log.SetLoggerFile(config.Conf.LogsPath)
+			log.DeleteOldLogs(config.Conf.LogRetentionDays, config.Conf.LogsPath)
+		})
 		if err != nil {
-			if config.Conf.EnableMonitor {
-				log.Error(err)
-			} else {
-				log.Fatal(err)
-			}
+			log.Panic("Error adding LogFile rotation cronjob: ", err)
 		}
-		lastBackup = time.Now().Format("2006-01-02T15")
 	}
 
 	if config.Conf.EnableMonitor {
-		mainWg.Add(1)
-		go func() {
-			defer mainWg.Done()
-			monitorLoop()
-		}()
+		go monitorLoop(config.Conf.MonitorIntervalSeconds, config.Conf.MonitorRetries)
 	}
 
-	for config.Conf.EnableBackup {
-		curHour := time.Now().Hour()
-		curBackup := time.Now().Format("2006-01-02T15")
-
-		log.Debug("Current hour: ", curHour)
-		log.Debug("Current Date: ", curBackup)
-		log.Debug("Last Backup Date: ", lastBackup)
-		log.Debug("BackupHours: ", config.Conf.BackupHours)
-
-		for _, hour := range config.Conf.BackupHours {
-			if hour == curHour && lastBackup != curBackup {
-				log.Debug("Running backup at hour: ", hour)
-				err := docker.BackupContainers()
-				if err != nil {
-					log.Error(err)
-				} else {
-					lastBackup = curBackup
-				}
+	if config.Conf.EnableBackup {
+		lastBackup := ""
+		if config.Conf.BackupOnStartup {
+			log.Info("Running DockerRight on startup")
+			err := docker.BackupContainers()
+			if err != nil {
+				log.Error(err)
+			} else {
+				lastBackup = time.Now().Format("2006-01-02T15")
 			}
 		}
-		minutes2FullHour := 60 - time.Now().Minute()
-		log.Debug("minutes2FullHour: ", minutes2FullHour)
-		if minutes2FullHour < 0 {
-			log.Warn("minutes2FullHour < 0, setting minutes2FullHour to 2... This should not been happening, please report this as a bug!")
-			minutes2FullHour = 2
-		} else if minutes2FullHour >= 10 {
-			log.Debug("minutes2FullHour >= 10, setting minutes2FullHour to 10")
-			minutes2FullHour = 10
+
+		for _, hour := range config.Conf.BackupHours {
+			cSchedule := fmt.Sprintf("5 %v * * *", hour)
+			_, err := c.AddFunc(cSchedule, func() {
+				curBackup := time.Now().Format("2006-01-02T15")
+				if curBackup != lastBackup {
+					log.Debug("Running backup at hour: ", hour)
+					err := docker.BackupContainers()
+					if err != nil {
+						log.Error(err)
+					}
+				} else {
+					log.Warn("Backup already ran at hour: ", hour, "\n", "This should only happen on startup and if you are running a backup on startup!")
+				}
+			})
+			if err != nil {
+				log.Panic("Error adding backup cronjob: ", err)
+			}
 		}
-		sleepDur := time.Duration(minutes2FullHour) * time.Second * 60
-		log.Debug("Sleeping for ", sleepDur, "...")
-		time.Sleep(sleepDur)
 	}
 
-	if !config.Conf.EnableBackup {
-		log.Warn("Backup functionality is disabled!")
-	}
+	c.Start()
+	log.Info("Number of current registered Cronjobs, it should show the daily LogFile rotation job as well as the Backups (as configured): ", len(c.Entries()))
 
-	mainWg.Wait()
+	select {}
 }
 
-func monitorLoop() {
-	sleepDur := time.Duration(config.Conf.MonitorIntervalSeconds) * time.Second
+func monitorLoop(intervalSec, monitorRetries int) {
+	containerInfos := []docker.ContainerInfo{}
+	ticker := time.NewTicker(time.Duration(intervalSec) * time.Second)
 	for {
-		err := docker.MonitorContainers()
+		err := docker.MonitorContainers(&containerInfos)
 		if err != nil {
 			log.MonitorMsg(err)
 		}
-		log.Info("Sleeping for ", sleepDur, "...")
-		time.Sleep(sleepDur)
+
+		for i, ci := range containerInfos {
+			if len(ci.States) < monitorRetries {
+				containerInfos[i].MonitorState = "unknown"
+				break
+			}
+
+			isRunning := false
+			isRunningCount := 0
+
+			for _, s := range ci.States[len(ci.States)-monitorRetries:] {
+				if s == "running" || s == "healthy" {
+					isRunningCount++
+				}
+			}
+
+			if isRunningCount >= monitorRetries {
+				isRunning = true
+			}
+
+			if isRunning {
+				if ci.MonitorState == "unknown" || ci.MonitorState == "" {
+					containerInfos[i].MonitorState = "running"
+				} else if ci.MonitorState == "stopped" || ci.MonitorState == "unhealthy" || ci.MonitorState == "exited" {
+					containerInfos[i].MonitorState = "running"
+					log.MonitorMsg(ci.Name, " is UP and running again :)")
+				}
+			} else if isRunningCount == 0 {
+				if ci.MonitorState != "stopped" && ci.MonitorState != "unhealthy" && ci.MonitorState != "exited" {
+					curState := ci.States[len(ci.States)-1]
+					containerInfos[i].MonitorState = curState
+					log.MonitorMsg(ci.Name, " is ", curState, "!")
+				} else {
+					log.Debug("Container stopped but not changed!")
+				}
+			}
+
+			if len(ci.States) >= monitorRetries*4 {
+				containerInfos[i].States = ci.States[monitorRetries*2:]
+			}
+		}
+
+		log.Info("Sleeping for ", intervalSec, "...")
+		<-ticker.C
 	}
 }
