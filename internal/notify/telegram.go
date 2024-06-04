@@ -31,7 +31,6 @@ func InitTelegram(c []int64, b string, botDebug bool) {
 	for _, chatID := range chatIDs {
 		msg := tgbotapi.NewMessage(chatID, "TestBot now online")
 		retMsg, err := bot.Send(msg)
-
 		if err != nil {
 			log.Error("Error sending starting Telegram Msg... ", retMsg)
 		}

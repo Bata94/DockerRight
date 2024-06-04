@@ -185,6 +185,8 @@ As the development is rapid I might skip the patchnotes for a version!
 - Telegram Notifications implemented
 - DockerContainer Monitor implemented
 - Added Parameter to toggle File logging
+- Moved away from time.Sleep() -> performance
+- Refactored BackupLoop -> performance
 
 ### 0.1.1
 
