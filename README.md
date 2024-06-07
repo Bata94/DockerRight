@@ -162,7 +162,7 @@ Those points are roughly in order of importance (for me):
 - [X] Add Parameter to enable/disable log to File
 - [ ] Deleting EnvVars do not overwrite config.json... (not sure how to fix/handle it right now...)
 - [ ] config.json FilePermissions
-- [ ] Add FormatWrapper for Notify Package
+- [ ] Add FormatWrapper for Notify Package (add LogLevel to Msg as well)
 - [ ] Refactor!!!
 - [ ] Mail Notifications
 - [ ] Discord Notifications
