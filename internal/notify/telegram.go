@@ -29,7 +29,7 @@ func InitTelegram(c []int64, b string, botDebug bool) {
 
 	log.Info("Telegram: Authorized on account ", bot.Self.UserName)
 	for _, chatID := range chatIDs {
-		msg := tgbotapi.NewMessage(chatID, "TestBot now online")
+		msg := tgbotapi.NewMessage(chatID, "DockerRightBot now online")
 		retMsg, err := bot.Send(msg)
 		if err != nil {
 			log.Error("Error sending starting Telegram Msg... ", retMsg)
