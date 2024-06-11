@@ -17,7 +17,7 @@ func init() {
 	log.Info("Initializing DockerRight")
 	log.TempInit()
 
-	err := os.MkdirAll("./config", 0o644)
+	err := os.MkdirAll("./config", 0o664)
 	if err != nil {
 		log.Fatal("Error creating config directory: ", err)
 	}

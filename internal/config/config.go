@@ -366,7 +366,7 @@ func (c *Config) Save() error {
 	if err != nil {
 		return errors.New("Error marshalling config file: " + err.Error())
 	}
-	err = os.WriteFile(ConfigPath, confFile, 0o644)
+	err = os.WriteFile(ConfigPath, confFile, 0o664)
 	if err != nil {
 		return errors.New("Error writing config file: " + err.Error())
 	}
