@@ -29,16 +29,21 @@ services:
       - ./:/opt/DockerRight
     environment:
       TZ: Europe/Berlin
-      LOG_LEVEL: "info"
-      ENABLE_BACKUP: true 
+      LOG2FILE: false
+      LOG_LEVEL: "debug"
+      ENABLE_BACKUP: false
       ENABLE_MONITOR: true
-      BACKUP_ON_STARTUP: true
-      CREATE_TEST_CONTAINER_ON_STARTUP: true
+      BACKUP_ON_STARTUP: false
+      CREATE_TEST_CONTAINER_ON_STARTUP: false
       BEFORE_BACKUP_CMD: "uname -a"
       AFTER_BACKUP_CMD: "ls -al /opt/DockerRight/backup"
       BACKUP_PATH: "/opt/DockerRight/backup"
-      BACKUP_HOURS: "[0,2,4,6,8,10,12,14,16,18,20,22]"
-      MONITOR_INTERVAL_SECONDS: 60
-      MONITOR_RETIES: 5
+      BACKUP_HOURS: "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]"
+      MONITOR_INTERVAL_SECONDS: 5
+      MONITOR_RETIES: 3
       RETENTION_HOURS: 24
       CONCURRENT_BACKUP_CONTAINERS: 8
+      NOTIFY_LEVEL: "warn"
+      TELEGRAM_BOT_TOKEN: "7310722475:AAGOdKm5iJlEMYYOHEP2hVMMm8XjSAkxn58"
+      TELEGRAM_CHAT_IDS: "[5619462875]"
+

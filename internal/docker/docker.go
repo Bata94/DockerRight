@@ -20,6 +20,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
+	"slices"
 )
 
 var (
@@ -77,12 +78,9 @@ func PullImage(imageName string) error {
 	}
 	pull := true
 	for _, img := range images {
-		for _, imgTag := range img.RepoTags {
-			if imageName == imgTag {
-				log.Debug("Image already pulled")
-				pull = false
-				break
-			}
+		if slices.Contains(img.RepoTags, imageName) {
+			log.Debug("Image already pulled")
+			pull = false
 		}
 		if !pull {
 			break
